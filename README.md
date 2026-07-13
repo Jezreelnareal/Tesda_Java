@@ -1,4 +1,4 @@
-<h1>👋 Jezreel Borlongan</h1>
+<h1>👋 Hi, I'm Jez</h1>
 <p><strong>Software Developer — Next.js, Web Systems & Blockchain Integration</strong></p>
 
 <h3>About</h3>
