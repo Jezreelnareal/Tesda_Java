@@ -41,3 +41,10 @@ use import java.util.* for universal imports
 **Creating Ojects Constructors**
 ![alt text](notes_image/{A819B635-4B30-48E9-8018-8AC4DCBB741B}.png)
 
+
+Chapter 2
+**Understanding Java Operators**
+![alt text](notes_image/image.png)
+
+**Order of Operator Precedence**
+![alt text](notes_image/image-1.png)
