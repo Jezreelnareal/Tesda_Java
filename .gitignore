@@ -1,0 +1,11 @@
+# Compiled output
+out/
+*.class
+
+# IDE-specific local state
+.idea/workspace.xml
+.vscode/
+
+# Local environment files
+.env
+*.local

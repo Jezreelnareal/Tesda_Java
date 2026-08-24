@@ -1,6 +1,7 @@
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLException;
 import model.Transaction;
 import model.User;
@@ -22,6 +23,8 @@ public class Main {
         try {
             userRepository.save(user);
             System.out.println("User saved successfully");
+        } catch (SQLIntegrityConstraintViolationException exception) {
+            System.out.println("Mobile number is already registered");
         } catch (SQLException exception) {
             System.out.println("Failed to save user");
             System.out.println(exception.getMessage());
@@ -50,6 +53,22 @@ public class Main {
             System.out.println("Database connection successful");
         } catch (SQLException exception) {
             System.out.println("Database connection failed");
+            System.out.println(exception.getMessage());
+        }
+
+        try {
+            User loadedUser
+                    = userRepository.findByMobileNumber("09171234567");
+
+            if (loadedUser == null) {
+                System.out.println("User not found");
+            } else {
+                System.out.println("Loaded name: " + loadedUser.getFullName());
+                System.out.println("Loaded mobile: " + loadedUser.getMobileNumber());
+                System.out.println("Loaded balance: " + loadedUser.getBalance());
+            }
+        } catch (SQLException exception) {
+            System.out.println("Failed to retrieve user");
             System.out.println(exception.getMessage());
         }
     }
