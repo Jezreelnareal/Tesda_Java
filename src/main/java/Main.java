@@ -4,16 +4,28 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import model.Transaction;
 import model.User;
+import repository.UserRepository;
 import util.DatabaseConnection;
 
 public class Main {
 
     public static void main(String[] args) {
         User user = new User("Juan Dela Cruz", "09171234567", "1234");
+
+        UserRepository userRepository = new UserRepository();
+
         System.out.println("Starting balance: " + user.getBalance());
         user.deposit(new BigDecimal("1000.00"));
         user.withdraw(new BigDecimal("250.00"));
         System.out.println("Final balance: " + user.getBalance());
+
+        try {
+            userRepository.save(user);
+            System.out.println("User saved successfully");
+        } catch (SQLException exception) {
+            System.out.println("Failed to save user");
+            System.out.println(exception.getMessage());
+        }
 
         try {
             user.withdraw(new BigDecimal("1000.00"));

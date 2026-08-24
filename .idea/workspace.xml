@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0dd24741-43e3-48b8-a879-b44df0a553ca" name="Changes" comment="configure files">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tesda_Java.iml" beforeDir="false" />
-    </list>
+    <list default="true" id="0dd24741-43e3-48b8-a879-b44df0a553ca" name="Changes" comment="configured files" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -39,23 +36,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0556013347981574" />
-      <entry key="MS500" value="1.7601351630665296" />
-      <entry key="S2" value="3.290442882322366" />
-      <entry key="S5" value="4.466694113095237" />
-      <entry key="S10" value="5.119346178725437" />
-      <entry key="S30" value="6.32819666508921" />
-      <entry key="S60" value="12.54780121515028" />
-      <entry key="M2" value="27.88746866155654" />
-      <entry key="M5" value="52.877644071301965" />
-      <entry key="M10" value="67.76513476243579" />
-      <entry key="M15" value="73.98683943702419" />
-      <entry key="M30" value="81.0176681573853" />
-      <entry key="H1" value="84.87987100079793" />
-      <entry key="H2" value="86.90633105005232" />
-      <entry key="H4" value="87.94458647877264" />
-      <entry key="D1" value="88.82289074775696" />
-      <entry key="W1" value="88.97466891495532" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0000000000000193" />
+      <entry key="S5" value="1.000018070759551" />
+      <entry key="S10" value="1.017963047566919" />
+      <entry key="S30" value="2.7972117685599382" />
+      <entry key="S60" value="6.713590924777188" />
+      <entry key="M2" value="12.400574933207631" />
+      <entry key="M5" value="30.72735236764577" />
+      <entry key="M10" value="53.64967031378859" />
+      <entry key="M15" value="66.74552040950954" />
+      <entry key="M30" value="84.30582638911932" />
+      <entry key="H1" value="95.25861450259623" />
+      <entry key="H2" value="101.38733812518561" />
+      <entry key="H4" value="104.63070338914024" />
+      <entry key="D1" value="107.42948673306955" />
+      <entry key="W1" value="107.91827567142822" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -77,23 +74,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.012600415586073" />
-      <entry key="MS500" value="1.7444094256006237" />
-      <entry key="S2" value="3.280854848030846" />
-      <entry key="S5" value="4.460956514936611" />
-      <entry key="S10" value="5.115934061571116" />
-      <entry key="S30" value="6.326795629374088" />
-      <entry key="S60" value="12.546576072529223" />
-      <entry key="M2" value="27.886179259765235" />
-      <entry key="M5" value="52.876603048870884" />
-      <entry key="M10" value="67.76442917876597" />
-      <entry key="M15" value="73.98631352826666" />
-      <entry key="M30" value="81.01737253973428" />
-      <entry key="H1" value="84.87971394474744" />
-      <entry key="H2" value="86.90625005865864" />
-      <entry key="H4" value="87.94454534715766" />
-      <entry key="D1" value="88.82288380240654" />
-      <entry key="W1" value="88.97466792053298" />
+      <entry key="MS100" value="0.9659363289248456" />
+      <entry key="MS500" value="0.9930924954370359" />
+      <entry key="S2" value="0.9982686325974118" />
+      <entry key="S5" value="0.999325147215709" />
+      <entry key="S10" value="1.0176083099928555" />
+      <entry key="S30" value="2.796821813937821" />
+      <entry key="S60" value="6.713096296510635" />
+      <entry key="M2" value="12.400100398851375" />
+      <entry key="M5" value="30.726818645387457" />
+      <entry key="M10" value="53.649160850419086" />
+      <entry key="M15" value="66.7450828444562" />
+      <entry key="M30" value="84.30553960289713" />
+      <entry key="H1" value="95.25844932603194" />
+      <entry key="H2" value="101.38724935686994" />
+      <entry key="H4" value="104.63065735807639" />
+      <entry key="D1" value="107.42947882332402" />
+      <entry key="W1" value="107.91827453551527" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
@@ -107,6 +104,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.Main.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -210,6 +208,18 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="configure files" />
-    <option name="LAST_COMMIT_MESSAGE" value="configure files" />
+    <MESSAGE value="configured files" />
+    <option name="LAST_COMMIT_MESSAGE" value="configured files" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/Main.java</url>
+          <line>15</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
