@@ -33,26 +33,20 @@ public class User {
      */
     public User(String fullName, String mobileNumber, String pin) {
         this();
-        this.fullName = fullName;
-        this.mobileNumber = mobileNumber;
-        this.pin = pin;
+        setFullName(fullName);
+        setMobileNumber(mobileNumber);
+        setPin(pin);
     }
 
-    /**
-     * Constructor to initialize the user with personal information and an
-     * initial balance.
-     *
-     * @param fullName The full name of the user.
-     * @param mobileNumber The mobile number of the user.
-     * @param pin The PIN of the user.
-     * @param initialBalance The initial balance of the user.
-     */
     public String getFullName() {
         return fullName;
     }
 
     public void setFullName(String fullName) {
-        this.fullName = fullName;
+        if (fullName == null || fullName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Full name cannot be null or empty");
+        }
+        this.fullName = fullName.trim();
     }
 
     public String getMobileNumber() {
@@ -60,6 +54,11 @@ public class User {
     }
 
     public void setMobileNumber(String mobileNumber) {
+        if (mobileNumber == null || !mobileNumber.matches("09\\d{9}")) { // Validates that the mobile number starts with "09" and is followed by 9 digits
+            throw new IllegalArgumentException(
+                    "Mobile number must contain 11 digits and start with 09"
+            );
+        }
         this.mobileNumber = mobileNumber;
     }
 
@@ -68,6 +67,9 @@ public class User {
     }
 
     public void setPin(String pin) {
+        if (pin == null || !pin.matches("\\d{4}")) { // Validates that the PIN contains exactly 4 digits
+            throw new IllegalArgumentException("PIN must contain exactly 4 digits");
+        }
         this.pin = pin;
     }
 
