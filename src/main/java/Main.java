@@ -1,7 +1,10 @@
 
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.SQLException;
 import model.Transaction;
 import model.User;
+import util.DatabaseConnection;
 
 public class Main {
 
@@ -30,5 +33,12 @@ public class Main {
                 "Transaction count after clearing returned list: "
                 + user.getTransactions().size()
         );
+
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            System.out.println("Database connection successful");
+        } catch (SQLException exception) {
+            System.out.println("Database connection failed");
+            System.out.println(exception.getMessage());
+        }
     }
 }
