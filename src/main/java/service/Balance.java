@@ -14,10 +14,14 @@ public final class Balance {
     }
 
     public String formatBalance(User user) {
-        BigDecimal amount = getCurrentBalance(user).setScale(
-                2,
-                RoundingMode.HALF_EVEN
-        );
-        return "PHP " + amount.toPlainString();
+        return formatAmount(getCurrentBalance(user));
+    }
+
+    public String formatAmount(BigDecimal amount) {
+        if (amount == null) {
+            throw new IllegalArgumentException("Amount cannot be null");
+        }
+        BigDecimal formattedAmount = amount.setScale(2, RoundingMode.HALF_EVEN);
+        return "PHP " + formattedAmount.toPlainString();
     }
 }

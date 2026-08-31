@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import model.CashInTransaction;
@@ -17,9 +18,17 @@ import util.DatabaseConnection;
 public class TransactionRepository {
 
     public long save(Transaction transaction) throws SQLException {
-        if (transaction == null) {
-            throw new IllegalArgumentException("Transaction cannot be null");
+        requireTransaction(transaction);
+
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            return save(connection, transaction);
         }
+    }
+
+    public long save(Connection connection, Transaction transaction)
+            throws SQLException {
+        requireConnection(connection);
+        requireTransaction(transaction);
 
         String sql = """
                 INSERT INTO transactions
@@ -29,11 +38,10 @@ public class TransactionRepository {
                 VALUES (?, ?, ?, ?, ?, ?)
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(
-                        sql,
-                        Statement.RETURN_GENERATED_KEYS
-                )) {
+        try (PreparedStatement statement = connection.prepareStatement(
+                sql,
+                Statement.RETURN_GENERATED_KEYS
+        )) {
             statement.setString(1, transaction.getType().name());
             statement.setBigDecimal(2, transaction.getAmount());
             statement.setString(3, transaction.getDetails());
@@ -90,7 +98,7 @@ public class TransactionRepository {
             Transaction transaction
     ) throws SQLException {
         if (transaction instanceof CashInTransaction cashIn) {
-            statement.setNull(5, java.sql.Types.VARCHAR);
+            statement.setNull(5, Types.VARCHAR);
             statement.setString(6, cashIn.getUserMobileNumber());
             return;
         }
@@ -148,6 +156,18 @@ public class TransactionRepository {
                     "Invalid transaction data for record " + id,
                     exception
             );
+        }
+    }
+
+    private static void requireConnection(Connection connection) {
+        if (connection == null) {
+            throw new IllegalArgumentException("Connection cannot be null");
+        }
+    }
+
+    private static void requireTransaction(Transaction transaction) {
+        if (transaction == null) {
+            throw new IllegalArgumentException("Transaction cannot be null");
         }
     }
 

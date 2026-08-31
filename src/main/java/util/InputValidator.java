@@ -1,8 +1,12 @@
 package util;
 
+import java.math.BigDecimal;
 import java.util.Scanner;
 
 public final class InputValidator {
+
+    private static final BigDecimal MAXIMUM_AMOUNT =
+            new BigDecimal("9999999999999.99");
 
     private InputValidator() {
         // Utility class
@@ -54,5 +58,38 @@ public final class InputValidator {
 
         System.out.print(prompt);
         return scanner.hasNextLine() ? scanner.nextLine().trim() : "";
+    }
+
+    public static BigDecimal readPositiveAmount(
+            Scanner scanner,
+            String prompt
+    ) {
+        if (scanner == null) {
+            throw new IllegalArgumentException("Scanner cannot be null");
+        }
+        if (prompt == null) {
+            throw new IllegalArgumentException("Prompt cannot be null");
+        }
+
+        while (true) {
+            System.out.print(prompt);
+            if (!scanner.hasNextLine()) {
+                return null;
+            }
+
+            String input = scanner.nextLine().trim();
+            if (input.matches("\\d+(\\.\\d{1,2})?")) {
+                BigDecimal amount = new BigDecimal(input);
+                if (amount.compareTo(BigDecimal.ZERO) > 0
+                        && amount.compareTo(MAXIMUM_AMOUNT) <= 0) {
+                    return amount;
+                }
+            }
+
+            System.out.println(
+                    "Invalid amount. Enter a positive number with up to "
+                    + "two decimal places."
+            );
+        }
     }
 }
