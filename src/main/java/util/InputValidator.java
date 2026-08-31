@@ -43,4 +43,16 @@ public final class InputValidator {
             );
         }
     }
+
+    public static String readTrimmedLine(Scanner scanner, String prompt) {
+        if (scanner == null) {
+            throw new IllegalArgumentException("Scanner cannot be null");
+        }
+        if (prompt == null) {
+            throw new IllegalArgumentException("Prompt cannot be null");
+        }
+
+        System.out.print(prompt);
+        return scanner.hasNextLine() ? scanner.nextLine().trim() : "";
+    }
 }
