@@ -2,6 +2,7 @@ import java.sql.SQLException;
 import java.util.Scanner;
 import model.User;
 import service.Auth;
+import service.Balance;
 import util.DatabaseConnection;
 import util.InputValidator;
 
@@ -9,7 +10,9 @@ public class Main {
 
     private static final int MAX_LOGIN_ATTEMPTS = 3;
     private static final int LOGIN_OPTION = 1;
+    private static final int VIEW_BALANCE_OPTION = 1;
     private static final int EXIT_OPTION = 0;
+    private static final int LOGOUT_OPTION = 0;
 
     public static void main(String[] args) {
         if (!verifyDatabaseConnection()) {
@@ -17,7 +20,7 @@ public class Main {
         }
 
         try (Scanner scanner = new Scanner(System.in)) {
-            runMenu(scanner, new Auth());
+            runMenu(scanner, new Auth(), new Balance());
         }
     }
 
@@ -35,7 +38,7 @@ public class Main {
         }
     }
 
-    private static void runMenu(Scanner scanner, Auth auth) {
+    private static void runMenu(Scanner scanner, Auth auth, Balance balance) {
         System.out.println("Hello JCash");
 
         boolean running = true;
@@ -51,7 +54,11 @@ public class Main {
             );
 
             switch (choice) {
-                case LOGIN_OPTION -> running = handleLogin(scanner, auth);
+                case LOGIN_OPTION -> running = handleLogin(
+                        scanner,
+                        auth,
+                        balance
+                );
                 case EXIT_OPTION -> {
                     System.out.println("Thank you for using JCash.");
                     running = false;
@@ -63,7 +70,11 @@ public class Main {
         }
     }
 
-    private static boolean handleLogin(Scanner scanner, Auth auth) {
+    private static boolean handleLogin(
+            Scanner scanner,
+            Auth auth,
+            Balance balance
+    ) {
         for (int attempt = 1; attempt <= MAX_LOGIN_ATTEMPTS; attempt++) {
             System.out.printf(
                     "%nLogin attempt %d of %d%n",
@@ -87,7 +98,7 @@ public class Main {
             }
 
             if (authenticatedUser != null) {
-                runAuthenticatedMenu(scanner, authenticatedUser);
+                runAuthenticatedMenu(scanner, authenticatedUser, balance);
                 return true;
             }
 
@@ -106,23 +117,44 @@ public class Main {
         return false;
     }
 
-    private static void runAuthenticatedMenu(Scanner scanner, User user) {
+    private static void runAuthenticatedMenu(
+            Scanner scanner,
+            User user,
+            Balance balance
+    ) {
         System.out.printf(
                 "%nLogin successful. Welcome, %s!%n",
                 user.getFullName()
         );
+        displayBalance(user, balance);
 
         boolean signedIn = true;
         while (signedIn) {
             System.out.println();
             System.out.println("Signed in as: " + user.getFullName());
+            System.out.println("1. View balance");
             System.out.println("0. Logout");
 
-            int choice = InputValidator.readMenuChoice(scanner, 0, 0);
-            if (choice == 0) {
-                System.out.println("Logged out successfully.");
-                signedIn = false;
+            int choice = InputValidator.readMenuChoice(
+                    scanner,
+                    LOGOUT_OPTION,
+                    VIEW_BALANCE_OPTION
+            );
+
+            switch (choice) {
+                case VIEW_BALANCE_OPTION -> displayBalance(user, balance);
+                case LOGOUT_OPTION -> {
+                    System.out.println("Logged out successfully.");
+                    signedIn = false;
+                }
+                default -> throw new IllegalStateException(
+                        "Unexpected authenticated menu choice: " + choice
+                );
             }
         }
+    }
+
+    private static void displayBalance(User user, Balance balance) {
+        System.out.println("Current balance: " + balance.formatBalance(user));
     }
 }

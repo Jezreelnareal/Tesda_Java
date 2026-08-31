@@ -7,8 +7,7 @@
     <list default="true" id="0dd24741-43e3-48b8-a879-b44df0a553ca" name="Changes" comment="configured files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/service/Auth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/service/Auth.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/util/InputValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/util/InputValidator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/service/Balance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/service/Balance.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,23 +40,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.7277634587121649" />
-      <entry key="MS500" value="4.377975012244938" />
-      <entry key="S2" value="10.57915800147328" />
-      <entry key="S5" value="16.077942836054856" />
-      <entry key="S10" value="19.362689458253893" />
-      <entry key="S30" value="22.267295801953544" />
-      <entry key="S60" value="23.10750321042544" />
-      <entry key="M2" value="23.557156749521152" />
-      <entry key="M5" value="26.085425012393028" />
-      <entry key="M10" value="43.10543329982315" />
-      <entry key="M15" value="68.29956314750162" />
-      <entry key="M30" value="144.11866675095177" />
-      <entry key="H1" value="244.31728209570772" />
-      <entry key="H2" value="334.37052096565077" />
-      <entry key="H4" value="396.6182408927999" />
-      <entry key="D1" value="460.6234099087387" />
-      <entry key="W1" value="472.91116063048736" />
+      <entry key="MS100" value="1.6690615628279777" />
+      <entry key="MS500" value="4.690484368824947" />
+      <entry key="S2" value="10.299934230415282" />
+      <entry key="S5" value="17.768803436274464" />
+      <entry key="S10" value="24.00799511216982" />
+      <entry key="S30" value="32.80972545225204" />
+      <entry key="S60" value="39.98433579047796" />
+      <entry key="M2" value="47.054292292157754" />
+      <entry key="M5" value="55.234903857171396" />
+      <entry key="M10" value="73.17246302925695" />
+      <entry key="M15" value="98.08845596343505" />
+      <entry key="M30" value="173.60813556204167" />
+      <entry key="H1" value="274.63038408050966" />
+      <entry key="H2" value="366.1555035275583" />
+      <entry key="H4" value="429.7088114286446" />
+      <entry key="D1" value="495.2533522419178" />
+      <entry key="W1" value="507.8568729080892" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -79,23 +78,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.6594308010447938" />
-      <entry key="MS500" value="4.340447487850437" />
-      <entry key="S2" value="10.556313415646008" />
-      <entry key="S5" value="16.063948808103543" />
-      <entry key="S10" value="19.354229250376026" />
-      <entry key="S30" value="22.264042744116963" />
-      <entry key="S60" value="23.105813937620635" />
-      <entry key="M2" value="23.55629530527135" />
-      <entry key="M5" value="26.08504114793189" />
-      <entry key="M10" value="43.105093427703764" />
-      <entry key="M15" value="68.29915712232696" />
-      <entry key="M30" value="144.1181193796094" />
-      <entry key="H1" value="244.3167452840222" />
-      <entry key="H2" value="334.3701284662967" />
-      <entry key="H4" value="396.61800112529716" />
-      <entry key="D1" value="460.6233624498059" />
-      <entry key="W1" value="472.9111536446475" />
+      <entry key="MS100" value="1.5948015005849818" />
+      <entry key="MS500" value="4.649529892191205" />
+      <entry key="S2" value="10.276875955177378" />
+      <entry key="S5" value="17.75280414638985" />
+      <entry key="S10" value="23.997137249617982" />
+      <entry key="S30" value="32.80476898223399" />
+      <entry key="S60" value="39.981324248853824" />
+      <entry key="M2" value="47.05252549431832" />
+      <entry key="M5" value="55.23407504588902" />
+      <entry key="M10" value="73.17189631141115" />
+      <entry key="M15" value="98.08790365287874" />
+      <entry key="M30" value="173.60752045258283" />
+      <entry key="H1" value="274.62981324565374" />
+      <entry key="H2" value="366.15509264921195" />
+      <entry key="H4" value="429.7085617414875" />
+      <entry key="D1" value="495.25330297584605" />
+      <entry key="W1" value="507.8568656594522" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -107,29 +106,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Main.executor": "Run",
-    "Git.Working.Tree.Tab.closed.by.user": "opened",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "Jcash__Banking",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;Git.Working.Tree.Tab.closed.by.user&quot;: &quot;opened&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Jcash__Banking&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="Main" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="Main" />
