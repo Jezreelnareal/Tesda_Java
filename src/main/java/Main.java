@@ -1,75 +1,64 @@
-
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLException;
-import model.Transaction;
-import model.User;
-import repository.UserRepository;
+import java.util.Scanner;
 import util.DatabaseConnection;
+import util.InputValidator;
 
 public class Main {
 
+    private static final int LOGIN_OPTION = 1;
+    private static final int EXIT_OPTION = 0;
+
     public static void main(String[] args) {
-        User user = new User("Juan Dela Cruz", "09171234567", "1234");
+        if (!verifyDatabaseConnection()) {
+            return;
+        }
 
-        UserRepository userRepository = new UserRepository();
+        try (Scanner scanner = new Scanner(System.in)) {
+            runMenu(scanner);
+        }
+    }
 
-        System.out.println("Starting balance: " + user.getBalance());
-        user.deposit(new BigDecimal("1000.00"));
-        user.withdraw(new BigDecimal("250.00"));
-        System.out.println("Final balance: " + user.getBalance());
-
+    private static boolean verifyDatabaseConnection() {
         try {
-            userRepository.save(user);
-            System.out.println("User saved successfully");
-        } catch (SQLIntegrityConstraintViolationException exception) {
-            System.out.println("Mobile number is already registered");
+            DatabaseConnection.verifyConnection();
+            System.out.println("Database connection successful.");
+            return true;
         } catch (SQLException exception) {
-            System.out.println("Failed to save user");
-            System.out.println(exception.getMessage());
+            System.out.println("Unable to connect to the JCash database.");
+            System.out.println(
+                    "Start MySQL and verify the database configuration."
+            );
+            return false;
         }
+    }
 
-        try {
-            user.withdraw(new BigDecimal("1000.00"));
-        } catch (IllegalArgumentException exception) {
-            System.out.println("Expected error: " + exception.getMessage());
+    private static void runMenu(Scanner scanner) {
+        System.out.println("Hello JCash");
 
-            System.out.println("Balance after failed withdrawal: " + user.getBalance());
-        }
+        boolean running = true;
+        while (running) {
+            System.out.println();
+            System.out.println("1. Login");
+            System.out.println("0. Exit");
 
-        user.addTransaction(new Transaction());
+            int choice = InputValidator.readMenuChoice(
+                    scanner,
+                    EXIT_OPTION,
+                    LOGIN_OPTION
+            );
 
-        System.out.println("Transaction count: " + user.getTransactions().size());
-
-        user.getTransactions().clear();
-
-        System.out.println(
-                "Transaction count after clearing returned list: "
-                + user.getTransactions().size()
-        );
-
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            System.out.println("Database connection successful");
-        } catch (SQLException exception) {
-            System.out.println("Database connection failed");
-            System.out.println(exception.getMessage());
-        }
-
-        try {
-            User loadedUser
-                    = userRepository.findByMobileNumber("09171234567");
-
-            if (loadedUser == null) {
-                System.out.println("User not found");
-            } else {
-                System.out.println("Loaded name: " + loadedUser.getFullName());
-                System.out.println("Loaded mobile: " + loadedUser.getMobileNumber());
-                System.out.println("Loaded balance: " + loadedUser.getBalance());
+            switch (choice) {
+                case LOGIN_OPTION -> System.out.println(
+                        "Login is not available yet."
+                );
+                case EXIT_OPTION -> {
+                    System.out.println("Thank you for using JCash.");
+                    running = false;
+                }
+                default -> throw new IllegalStateException(
+                        "Unexpected menu choice: " + choice
+                );
             }
-        } catch (SQLException exception) {
-            System.out.println("Failed to retrieve user");
-            System.out.println(exception.getMessage());
         }
     }
 }

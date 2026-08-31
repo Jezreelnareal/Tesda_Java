@@ -1,0 +1,161 @@
+package repository;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import model.CashInTransaction;
+import model.Transaction;
+import model.TransactionType;
+import model.TransferTransaction;
+import util.DatabaseConnection;
+
+public class TransactionRepository {
+
+    public long save(Transaction transaction) throws SQLException {
+        if (transaction == null) {
+            throw new IllegalArgumentException("Transaction cannot be null");
+        }
+
+        String sql = """
+                INSERT INTO transactions
+                    (transaction_type, amount, details,
+                     transaction_date_time, sender_mobile_number,
+                     receiver_mobile_number)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(
+                        sql,
+                        Statement.RETURN_GENERATED_KEYS
+                )) {
+            statement.setString(1, transaction.getType().name());
+            statement.setBigDecimal(2, transaction.getAmount());
+            statement.setString(3, transaction.getDetails());
+            statement.setTimestamp(
+                    4,
+                    Timestamp.valueOf(transaction.getDateTime())
+            );
+            setParticipants(statement, transaction);
+            statement.executeUpdate();
+
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (!generatedKeys.next()) {
+                    throw new SQLException(
+                            "Transaction was saved without a generated ID"
+                    );
+                }
+                return generatedKeys.getLong(1);
+            }
+        }
+    }
+
+    public List<Transaction> findByUserMobileNumber(String mobileNumber)
+            throws SQLException {
+        requireMobileNumber(mobileNumber);
+
+        String sql = """
+                SELECT id, transaction_type, amount, details,
+                       transaction_date_time, sender_mobile_number,
+                       receiver_mobile_number
+                FROM transactions
+                WHERE sender_mobile_number = ? OR receiver_mobile_number = ?
+                ORDER BY transaction_date_time DESC, id DESC
+                """;
+
+        List<Transaction> transactions = new ArrayList<>();
+
+        try (Connection connection = DatabaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, mobileNumber);
+            statement.setString(2, mobileNumber);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    transactions.add(mapTransaction(resultSet));
+                }
+            }
+        }
+
+        return List.copyOf(transactions);
+    }
+
+    private static void setParticipants(
+            PreparedStatement statement,
+            Transaction transaction
+    ) throws SQLException {
+        if (transaction instanceof CashInTransaction cashIn) {
+            statement.setNull(5, java.sql.Types.VARCHAR);
+            statement.setString(6, cashIn.getUserMobileNumber());
+            return;
+        }
+
+        if (transaction instanceof TransferTransaction transfer) {
+            statement.setString(5, transfer.getSenderMobileNumber());
+            statement.setString(6, transfer.getReceiverMobileNumber());
+            return;
+        }
+
+        throw new IllegalArgumentException(
+                "Unsupported transaction class: "
+                + transaction.getClass().getName()
+        );
+    }
+
+    private static Transaction mapTransaction(ResultSet resultSet)
+            throws SQLException {
+        long id = resultSet.getLong("id");
+        TransactionType type;
+
+        try {
+            type = TransactionType.valueOf(
+                    resultSet.getString("transaction_type")
+            );
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            throw new SQLException(
+                    "Unsupported transaction type for record " + id,
+                    exception
+            );
+        }
+
+        try {
+            return switch (type) {
+                case CASH_IN -> new CashInTransaction(
+                        id,
+                        resultSet.getString("receiver_mobile_number"),
+                        resultSet.getBigDecimal("amount"),
+                        resultSet.getString("details"),
+                        resultSet.getTimestamp("transaction_date_time")
+                                .toLocalDateTime()
+                );
+                case TRANSFER -> new TransferTransaction(
+                        id,
+                        resultSet.getString("sender_mobile_number"),
+                        resultSet.getString("receiver_mobile_number"),
+                        resultSet.getBigDecimal("amount"),
+                        resultSet.getString("details"),
+                        resultSet.getTimestamp("transaction_date_time")
+                                .toLocalDateTime()
+                );
+            };
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            throw new SQLException(
+                    "Invalid transaction data for record " + id,
+                    exception
+            );
+        }
+    }
+
+    private static void requireMobileNumber(String mobileNumber) {
+        if (mobileNumber == null || !mobileNumber.matches("09\\d{9}")) {
+            throw new IllegalArgumentException(
+                    "Mobile number must contain 11 digits and start with 09"
+            );
+        }
+    }
+}

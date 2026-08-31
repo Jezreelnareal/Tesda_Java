@@ -6,6 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="0dd24741-43e3-48b8-a879-b44df0a553ca" name="Changes" comment="configured files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/database/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/model/Transaction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/Transaction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/repository/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/util/DatabaseConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/util/DatabaseConnection.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/util/InputValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/util/InputValidator.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,41 +27,41 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Jezreelnareal"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Jezreelnareal&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Jezreelnareal/Tesda_Java.git",
-    "accountId": "6cead2aa-3068-46f7-a1c4-ffcd48953d28"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Jezreelnareal/Tesda_Java.git&quot;,
+    &quot;accountId&quot;: &quot;6cead2aa-3068-46f7-a1c4-ffcd48953d28&quot;
   }
-}]]></component>
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0004602875318287" />
-      <entry key="S5" value="1.2752489360189407" />
-      <entry key="S10" value="3.3464824783641354" />
-      <entry key="S30" value="11.740275320992316" />
-      <entry key="S60" value="19.669580702337978" />
-      <entry key="M2" value="30.35413464825426" />
-      <entry key="M5" value="47.44951438947515" />
-      <entry key="M10" value="66.13919278703617" />
-      <entry key="M15" value="82.01008501574827" />
-      <entry key="M30" value="112.83932721645722" />
-      <entry key="H1" value="138.91637098137534" />
-      <entry key="H2" value="156.1354349436446" />
-      <entry key="H4" value="166.0640240866289" />
-      <entry key="D1" value="175.10288128036083" />
-      <entry key="W1" value="176.72709786505587" />
+      <entry key="MS100" value="1.4847016306468628" />
+      <entry key="MS500" value="4.307450245541993" />
+      <entry key="S2" value="12.742685906992538" />
+      <entry key="S5" value="20.974188210472615" />
+      <entry key="S10" value="26.270175823059553" />
+      <entry key="S30" value="32.25394205568602" />
+      <entry key="S60" value="38.03713347108456" />
+      <entry key="M2" value="47.82465387686288" />
+      <entry key="M5" value="71.38829212259125" />
+      <entry key="M10" value="106.96141309523564" />
+      <entry key="M15" value="137.97517704663113" />
+      <entry key="M30" value="207.94994095083302" />
+      <entry key="H1" value="283.66958910911643" />
+      <entry key="H2" value="344.12755296642183" />
+      <entry key="H4" value="383.192162235496" />
+      <entry key="D1" value="421.58826825100783" />
+      <entry key="W1" value="428.78231620086166" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -76,29 +83,29 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="8.535624226836889E-7" />
-      <entry key="MS500" value="0.06112896709045872" />
-      <entry key="S2" value="0.4976943972614837" />
-      <entry key="S5" value="1.0311952324676377" />
-      <entry key="S10" value="3.215075693146202" />
-      <entry key="S30" value="11.693250405442315" />
-      <entry key="S60" value="19.64525073818381" />
-      <entry key="M2" value="30.341533118747474" />
-      <entry key="M5" value="47.444216401683484" />
-      <entry key="M10" value="66.13638663501092" />
-      <entry key="M15" value="82.0081147417517" />
-      <entry key="M30" value="112.83823886899327" />
-      <entry key="H1" value="138.91578126843422" />
-      <entry key="H2" value="156.13512474118087" />
-      <entry key="H4" value="166.06386451625747" />
-      <entry key="D1" value="175.10285400300657" />
-      <entry key="W1" value="176.72709395071976" />
+      <entry key="MS100" value="1.4264494682846267" />
+      <entry key="MS500" value="4.270609854815179" />
+      <entry key="S2" value="12.713650924666192" />
+      <entry key="S5" value="20.954700451432203" />
+      <entry key="S10" value="26.257871132463467" />
+      <entry key="S30" value="32.24887607748459" />
+      <entry key="S60" value="38.03414973678559" />
+      <entry key="M2" value="47.82278116698833" />
+      <entry key="M5" value="71.38715822568388" />
+      <entry key="M10" value="106.96046290314037" />
+      <entry key="M15" value="137.9742375916662" />
+      <entry key="M30" value="207.94905795992423" />
+      <entry key="H1" value="283.6689123711173" />
+      <entry key="H2" value="344.1271213206377" />
+      <entry key="H4" value="383.1919166260192" />
+      <entry key="D1" value="421.58822248392613" />
+      <entry key="W1" value="428.7823095341039" />
     </decayedShown>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 7
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 7
+}</component>
   <component name="ProjectId" id="3INHt2fCbe20v3QDmaON2p7A8hS" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -115,6 +122,7 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "git-widget-placeholder": "Jcash__Banking",
+    "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -220,16 +228,5 @@
     <MESSAGE value="configure files" />
     <MESSAGE value="configured files" />
     <option name="LAST_COMMIT_MESSAGE" value="configured files" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/Main.java</url>
-          <line>28</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
