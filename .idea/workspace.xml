@@ -5,14 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0dd24741-43e3-48b8-a879-b44df0a553ca" name="Changes" comment="configured files">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/repository/TransactionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/repository/TransactionRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/service/Balance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/service/Balance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/service/CashIn.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/service/CashIn.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/service/Logs.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/service/Logs.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/service/Transfer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/service/Transfer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/util/DatabaseConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/util/DatabaseConnection.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/util/InputValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/util/InputValidator.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -46,23 +44,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000725834613422" />
-      <entry key="MS500" value="1.1735608170383611" />
-      <entry key="S2" value="3.887506672204258" />
-      <entry key="S5" value="7.6476425166060125" />
-      <entry key="S10" value="9.928787621485064" />
-      <entry key="S30" value="15.935119221887486" />
-      <entry key="S60" value="27.490005007232128" />
-      <entry key="M2" value="42.86464103044201" />
-      <entry key="M5" value="68.4593098506633" />
-      <entry key="M10" value="96.90207317590222" />
-      <entry key="M15" value="124.09982063726781" />
-      <entry key="M30" value="202.18263891273543" />
-      <entry key="H1" value="310.4948157020756" />
-      <entry key="H2" value="412.6106286907299" />
-      <entry key="H4" value="485.3338527996318" />
-      <entry key="D1" value="561.6595135877983" />
-      <entry key="W1" value="576.476257548464" />
+      <entry key="MS100" value="1.239463205547799" />
+      <entry key="MS500" value="3.1128963469636752" />
+      <entry key="S2" value="8.865365584664534" />
+      <entry key="S5" value="13.713767759638065" />
+      <entry key="S10" value="16.39963794732771" />
+      <entry key="S30" value="18.985807447775795" />
+      <entry key="S60" value="22.257650482090266" />
+      <entry key="M2" value="28.990302770670077" />
+      <entry key="M5" value="46.03751788786702" />
+      <entry key="M10" value="73.12443126636394" />
+      <entry key="M15" value="99.31650550362593" />
+      <entry key="M30" value="177.38830714065034" />
+      <entry key="H1" value="304.5791136176721" />
+      <entry key="H2" value="444.7214355381393" />
+      <entry key="H4" value="555.1466605907959" />
+      <entry key="D1" value="679.5858090561454" />
+      <entry key="W1" value="704.6936124856004" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -84,23 +82,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9527066661821432" />
-      <entry key="MS500" value="1.1619921603710437" />
-      <entry key="S2" value="3.8775886603510923" />
-      <entry key="S5" value="7.639866234849343" />
-      <entry key="S10" value="9.923750919912743" />
-      <entry key="S30" value="15.932537296828666" />
-      <entry key="S60" value="27.487883819255018" />
-      <entry key="M2" value="42.863027786610594" />
-      <entry key="M5" value="68.45829017699826" />
-      <entry key="M10" value="96.90134356534556" />
-      <entry key="M15" value="124.0991666854329" />
-      <entry key="M30" value="202.18199441139365" />
-      <entry key="H1" value="310.49422774614965" />
-      <entry key="H2" value="412.61020033191215" />
-      <entry key="H4" value="485.33358956917453" />
-      <entry key="D1" value="561.6594610392473" />
-      <entry key="W1" value="576.4762497997862" />
+      <entry key="MS100" value="1.1741053950940448" />
+      <entry key="MS500" value="3.0784255800410403" />
+      <entry key="S2" value="8.839726223646622" />
+      <entry key="S5" value="13.69780209959563" />
+      <entry key="S10" value="16.39008559081848" />
+      <entry key="S30" value="18.982114416028455" />
+      <entry key="S60" value="22.25545421021085" />
+      <entry key="M2" value="28.988829789713638" />
+      <entry key="M5" value="46.036435690179005" />
+      <entry key="M10" value="73.12346015098265" />
+      <entry key="M15" value="99.3156188389325" />
+      <entry key="M30" value="177.38754201100568" />
+      <entry key="H1" value="304.57845003811343" />
+      <entry key="H2" value="444.72093647692606" />
+      <entry key="H4" value="555.1463425494642" />
+      <entry key="D1" value="679.5857428984923" />
+      <entry key="W1" value="704.6936026515806" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{

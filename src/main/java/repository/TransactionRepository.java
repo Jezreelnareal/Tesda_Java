@@ -20,9 +20,9 @@ public class TransactionRepository {
     public long save(Transaction transaction) throws SQLException {
         requireTransaction(transaction);
 
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            return save(connection, transaction);
-        }
+        return DatabaseConnection.withReusableConnection(
+                connection -> save(connection, transaction)
+        );
     }
 
     public long save(Connection connection, Transaction transaction)
@@ -78,19 +78,57 @@ public class TransactionRepository {
 
         List<Transaction> transactions = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, mobileNumber);
-            statement.setString(2, mobileNumber);
+        DatabaseConnection.withReusableConnection(connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, mobileNumber);
+                statement.setString(2, mobileNumber);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        transactions.add(mapTransaction(resultSet));
+                    }
+                }
+                return null;
+            }
+        });
+
+        return List.copyOf(transactions);
+    }
+
+    public List<Transaction> findAll() throws SQLException {
+        String sql = """
+                SELECT id, transaction_type, amount, details,
+                       transaction_date_time, sender_mobile_number,
+                       receiver_mobile_number
+                FROM transactions
+                ORDER BY transaction_date_time DESC, id DESC
+                """;
+
+        List<Transaction> transactions = new ArrayList<>();
+
+        DatabaseConnection.withReusableConnection(connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(sql);
+                    ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     transactions.add(mapTransaction(resultSet));
                 }
+                return null;
             }
-        }
+        });
 
         return List.copyOf(transactions);
+    }
+
+    public boolean deleteById(long transactionId) throws SQLException {
+        requireTransactionId(transactionId);
+
+        String sql = "DELETE FROM transactions WHERE id = ?";
+        return DatabaseConnection.withReusableConnection(connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setLong(1, transactionId);
+                return statement.executeUpdate() == 1;
+            }
+        });
     }
 
     private static void setParticipants(
@@ -175,6 +213,14 @@ public class TransactionRepository {
         if (mobileNumber == null || !mobileNumber.matches("09\\d{9}")) {
             throw new IllegalArgumentException(
                     "Mobile number must contain 11 digits and start with 09"
+            );
+        }
+    }
+
+    private static void requireTransactionId(long transactionId) {
+        if (transactionId <= 0) {
+            throw new IllegalArgumentException(
+                    "Transaction ID must be positive"
             );
         }
     }

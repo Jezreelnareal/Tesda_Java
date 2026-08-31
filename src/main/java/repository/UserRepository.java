@@ -19,22 +19,37 @@ public class UserRepository {
                 VALUES (?, ?, ?, ?)
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, user.getMobileNumber());
-            statement.setString(2, user.getPin());
-            statement.setString(3, user.getFullName());
-            statement.setBigDecimal(4, user.getBalance());
-            statement.executeUpdate();
-        }
+        DatabaseConnection.withReusableConnection(connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, user.getMobileNumber());
+                statement.setString(2, user.getPin());
+                statement.setString(3, user.getFullName());
+                statement.setBigDecimal(4, user.getBalance());
+                statement.executeUpdate();
+                return null;
+            }
+        });
     }
 
     public User findByMobileNumber(String mobileNumber) throws SQLException {
         requireMobileNumber(mobileNumber);
 
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            return findByMobileNumber(connection, mobileNumber, false);
-        }
+        return DatabaseConnection.withReusableConnection(
+                connection -> findByMobileNumber(
+                        connection,
+                        mobileNumber,
+                        false
+                )
+        );
+    }
+
+    public User findByMobileNumber(
+            Connection connection,
+            String mobileNumber
+    ) throws SQLException {
+        requireConnection(connection);
+        requireMobileNumber(mobileNumber);
+        return findByMobileNumber(connection, mobileNumber, false);
     }
 
     public User findByMobileNumberForUpdate(

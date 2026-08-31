@@ -1,6 +1,7 @@
 # Compiled output
 out/
 *.class
+docs/performance/results/*.jfr
 
 # IDE-specific local state
 .idea/workspace.xml

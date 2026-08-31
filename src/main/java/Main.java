@@ -23,19 +23,23 @@ public class Main {
     private static final int LOGOUT_OPTION = 0;
 
     public static void main(String[] args) {
-        if (!verifyDatabaseConnection()) {
-            return;
-        }
+        try {
+            if (!verifyDatabaseConnection()) {
+                return;
+            }
 
-        try (Scanner scanner = new Scanner(System.in)) {
-            runMenu(
-                    scanner,
-                    new Auth(),
-                    new Balance(),
-                    new CashIn(),
-                    new Transfer(),
-                    new Logs()
-            );
+            try (Scanner scanner = new Scanner(System.in)) {
+                runMenu(
+                        scanner,
+                        new Auth(),
+                        new Balance(),
+                        new CashIn(),
+                        new Transfer(),
+                        new Logs()
+                );
+            }
+        } finally {
+            DatabaseConnection.shutdown();
         }
     }
 

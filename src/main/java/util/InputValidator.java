@@ -92,4 +92,32 @@ public final class InputValidator {
             );
         }
     }
+
+    public static Long readPositiveLong(Scanner scanner, String prompt) {
+        if (scanner == null) {
+            throw new IllegalArgumentException("Scanner cannot be null");
+        }
+        if (prompt == null) {
+            throw new IllegalArgumentException("Prompt cannot be null");
+        }
+
+        while (true) {
+            System.out.print(prompt);
+            if (!scanner.hasNextLine()) {
+                return null;
+            }
+
+            String input = scanner.nextLine().trim();
+            try {
+                long value = Long.parseLong(input);
+                if (value > 0) {
+                    return value;
+                }
+            } catch (NumberFormatException ignored) {
+                // The common validation message below covers invalid input.
+            }
+
+            System.out.println("Invalid ID. Enter a positive whole number.");
+        }
+    }
 }
