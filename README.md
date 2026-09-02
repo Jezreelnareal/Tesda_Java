@@ -39,6 +39,7 @@ Both login types allow three failed attempts per application session.
 - Java Swing
 - JDBC
 - MySQL
+- Docker Compose for the local MySQL service
 - Maven dependency and build management
 - FlatLaf light and dark themes
 - Java Flight Recorder for performance evidence
@@ -47,38 +48,101 @@ Both login types allow three failed attempts per application session.
 ## Requirements
 
 - JDK 17 or newer; the current project has been verified with JDK 25
-- MySQL 8 or newer
+- Docker Desktop with Docker Compose
 - Maven 3.9+ (IntelliJ IDEA's bundled Maven also works)
 - IntelliJ IDEA is recommended; Connector/J and FlatLaf are downloaded by Maven
 
-## Database setup
+## Docker database setup
 
 > [!WARNING]
 > `database/schema.sql` runs `DROP DATABASE IF EXISTS jcash_db`. Running it
 > permanently removes the current contents of `jcash_db` before recreating and
 > seeding the assignment database.
 
-1. Start MySQL.
-2. Open [`database/schema.sql`](database/schema.sql) in MySQL Workbench or an
-   IntelliJ database console and execute the whole file.
-3. Open [`database/seed.sql`](database/seed.sql) and execute it afterward.
-4. Confirm that the `users`, `admins`, and `transactions` tables exist in
-   `jcash_db`.
+JCash runs as a normal desktop application while MySQL runs in Docker. Keep
+[`compose.yaml`](compose.yaml) and `.env` in the project root beside `pom.xml`:
 
-The application uses these defaults:
+```text
+Tesda_Java/
+|-- .env
+|-- compose.yaml
+|-- pom.xml
+|-- database/
+|   |-- schema.sql
+|   `-- seed.sql
+`-- src/
+```
 
-| Setting | Default |
+Create `.env` with local development passwords:
+
+```env
+MYSQL_ROOT_PASSWORD=replace-with-a-root-password
+JCASH_DB_PASSWORD=replace-with-an-app-password
+```
+
+The file is ignored by Git and must not be committed. Stop MySQL in XAMPP
+before starting Docker because only one service can use host port `3306`.
+
+Start the database from the project root:
+
+```powershell
+docker compose up -d
+docker compose ps
+```
+
+The `db` service should report `healthy`. On its first start, Compose mounts
+`database/schema.sql` and `database/seed.sql` into MySQL's initialization
+directory. The resulting database contains the `users`, `admins`, and
+`transactions` tables.
+
+Useful database commands:
+
+```powershell
+# Follow MySQL startup and initialization logs
+docker compose logs -f db
+
+# Stop without deleting data
+docker compose stop
+
+# Start an existing stopped container
+docker compose start
+
+# Remove the container while preserving the database volume
+docker compose down
+```
+
+Initialization scripts run only when the MySQL data volume is empty. To
+intentionally delete all Docker database data and recreate the seeded database:
+
+```powershell
+docker compose down -v
+docker compose up -d
+```
+
+> [!CAUTION]
+> The `-v` option permanently deletes the current Docker database volume,
+> including registered users, balances, and transaction history.
+
+## JCash database configuration
+
+The Docker database uses these application settings:
+
+| Environment variable | Value |
 |---|---|
-| JDBC URL | `jdbc:mysql://localhost:3306/jcash_db` |
-| Database user | `root` |
-| Database password | Empty |
+| `JCASH_DB_URL` | `jdbc:mysql://localhost:3306/jcash_db` |
+| `JCASH_DB_USER` | `jcash` |
+| `JCASH_DB_PASSWORD` | Same value as `.env` |
 
-Override the defaults in PowerShell when necessary:
+Docker Compose reads `.env`, but the Java application does not. Supply these
+variables separately in the IntelliJ run configuration or the terminal that
+launches JCash.
+
+For PowerShell:
 
 ```powershell
 $env:JCASH_DB_URL = "jdbc:mysql://localhost:3306/jcash_db"
-$env:JCASH_DB_USER = "root"
-$env:JCASH_DB_PASSWORD = "your-password"
+$env:JCASH_DB_USER = "jcash"
+$env:JCASH_DB_PASSWORD = "replace-with-the-app-password-from-.env"
 ```
 
 ## IntelliJ setup and run
@@ -90,12 +154,19 @@ $env:JCASH_DB_PASSWORD = "your-password"
    Connector/J automatically.
 4. Open [`Main.java`](src/main/java/Main.java), click the green run arrow beside
    `main`, then choose **Run 'Main.main()'**.
-5. Wait for the login form to show **Database connected**.
+5. Open **Run > Edit Configurations**, select the `Main` configuration, and add
+   the three `JCASH_DB_*` values shown above under **Environment variables**.
+   Do not include quotes or extra spaces.
+6. Run JCash and wait for the login form to show **Database connected**.
 
 You can also run the `exec:java` goal from the Maven tool window under
 **Plugins > exec**, or use a terminal:
 
 ```powershell
+$env:JCASH_DB_URL = "jdbc:mysql://localhost:3306/jcash_db"
+$env:JCASH_DB_USER = "jcash"
+$env:JCASH_DB_PASSWORD = "replace-with-the-app-password-from-.env"
+
 mvn clean compile
 mvn exec:java
 ```
@@ -114,8 +185,13 @@ production banking system.
 
 ## Manual acceptance test
 
-Run the schema and seed files immediately before this test so the expected
-balances are deterministic.
+Reset the Docker database immediately before this test so the expected balances
+are deterministic. This deletes the current Docker data volume:
+
+```powershell
+docker compose down -v
+docker compose up -d
+```
 
 ### 1. Navigation and login
 
@@ -224,9 +300,13 @@ The script saves benchmark logs and Java Flight Recorder summaries under
 
 ### Database unavailable
 
-- Confirm that MySQL is running.
-- Confirm that `jcash_db` was created by the current schema.
-- Check `JCASH_DB_URL`, `JCASH_DB_USER`, and `JCASH_DB_PASSWORD`.
+- Run `docker compose ps` and confirm that `jcash-mysql` is healthy.
+- Inspect initialization errors with `docker compose logs db`.
+- Confirm XAMPP MySQL is stopped and Docker owns port `3306`.
+- Confirm that `JCASH_DB_PASSWORD` exactly matches the value in `.env`.
+- Confirm the variables were added to the active IntelliJ `Main` run
+  configuration, then completely stop and restart JCash.
+- Remember that `.env` is read by Compose, not automatically by Java.
 - Use **Retry connection** on the login screen after fixing the database.
 
 ### Maven dependencies are red in IntelliJ
