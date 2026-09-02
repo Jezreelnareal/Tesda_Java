@@ -5,6 +5,7 @@ import model.Admin;
 import model.User;
 import repository.AdminRepository;
 import repository.UserRepository;
+import util.PinHasher;
 
 public final class Auth {
 
@@ -42,7 +43,8 @@ public final class Auth {
         String normalizedPin = pin.trim();
         User user = userRepository.findByMobileNumber(normalizedMobileNumber);
 
-        if (user == null || !user.getPin().equals(normalizedPin)) {
+        if (user == null
+                || !PinHasher.verify(normalizedPin, user.getPinHash())) {
             return null;
         }
 
@@ -58,7 +60,9 @@ public final class Auth {
         }
 
         Admin admin = adminRepository.findByUsername(username.trim());
-        return admin != null && admin.pin().equals(pin.trim()) ? admin : null;
+        return admin != null
+                && PinHasher.verify(pin.trim(), admin.pinHash())
+                ? admin : null;
     }
 
     private static boolean hasValidCredentialFormat(

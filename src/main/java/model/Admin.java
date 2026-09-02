@@ -1,6 +1,8 @@
 package model;
 
-public record Admin(String username, String pin) {
+import util.PinHasher;
+
+public record Admin(String username, String pinHash) {
 
     public Admin {
         if (username == null || !username.matches("[A-Za-z0-9_.-]{3,30}")) {
@@ -8,10 +10,8 @@ public record Admin(String username, String pin) {
                     "Admin username must contain 3 to 30 valid characters"
             );
         }
-        if (pin == null || !pin.matches("\\d{4}")) {
-            throw new IllegalArgumentException(
-                    "Admin PIN must contain exactly 4 digits"
-            );
+        if (!PinHasher.isEncodedHash(pinHash)) {
+            throw new IllegalArgumentException("Stored admin PIN hash is invalid");
         }
     }
 }

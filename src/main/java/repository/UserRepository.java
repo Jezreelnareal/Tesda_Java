@@ -24,7 +24,7 @@ public class UserRepository {
         DatabaseConnection.withReusableConnection(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setString(1, user.getMobileNumber());
-                statement.setString(2, user.getPin());
+                statement.setString(2, user.getPinHash());
                 statement.setString(3, user.getFullName());
                 statement.setBigDecimal(4, user.getBalance());
                 statement.executeUpdate();
@@ -127,7 +127,7 @@ public class UserRepository {
     }
 
     private static User mapUser(ResultSet resultSet) throws SQLException {
-        User user = new User(
+        User user = User.fromStoredPinHash(
                 resultSet.getString("full_name"),
                 resultSet.getString("mobile_number"),
                 resultSet.getString("pin")

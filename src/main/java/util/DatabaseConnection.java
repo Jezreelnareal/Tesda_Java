@@ -54,6 +54,7 @@ public final class DatabaseConnection {
             if (!connection.isValid(VALIDATION_TIMEOUT_SECONDS)) {
                 throw new SQLException("Database connection validation failed");
             }
+            CredentialMigration.migrate(connection);
             return null;
         });
     }

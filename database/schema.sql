@@ -8,7 +8,7 @@ USE jcash_db;
 
 CREATE TABLE users (
     mobile_number VARCHAR(11) NOT NULL,
-    pin CHAR(4) NOT NULL,
+    pin VARCHAR(255) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
     balance DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     PRIMARY KEY (mobile_number)
@@ -16,7 +16,7 @@ CREATE TABLE users (
 
 CREATE TABLE admins (
     username VARCHAR(30) NOT NULL,
-    pin CHAR(4) NOT NULL,
+    pin VARCHAR(255) NOT NULL,
     PRIMARY KEY (username)
 );
 

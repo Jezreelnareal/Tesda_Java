@@ -3,6 +3,7 @@ package model;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import util.PinHasher;
 
 /**
  * Represents a JCash customer and controls changes to their balance and
@@ -12,7 +13,7 @@ public class User {
 
     private String fullName;
     private String mobileNumber;
-    private String pin;
+    private String pinHash;
     private BigDecimal balance;
     private final List<Transaction> transactions;
 
@@ -26,6 +27,18 @@ public class User {
         setFullName(fullName);
         setMobileNumber(mobileNumber);
         setPin(pin);
+    }
+
+    public static User fromStoredPinHash(
+            String fullName,
+            String mobileNumber,
+            String pinHash
+    ) {
+        User user = new User();
+        user.setFullName(fullName);
+        user.setMobileNumber(mobileNumber);
+        user.setPinHash(pinHash);
+        return user;
     }
 
     public String getFullName() {
@@ -54,17 +67,19 @@ public class User {
         this.mobileNumber = mobileNumber;
     }
 
-    public String getPin() {
-        return pin;
+    public String getPinHash() {
+        return pinHash;
     }
 
     public void setPin(String pin) {
-        if (pin == null || !pin.matches("\\d{4}")) {
-            throw new IllegalArgumentException(
-                    "PIN must contain exactly 4 digits"
-            );
+        this.pinHash = PinHasher.hash(pin);
+    }
+
+    private void setPinHash(String pinHash) {
+        if (!PinHasher.isEncodedHash(pinHash)) {
+            throw new IllegalArgumentException("Stored PIN hash is invalid");
         }
-        this.pin = pin;
+        this.pinHash = pinHash;
     }
 
     public BigDecimal getBalance() {

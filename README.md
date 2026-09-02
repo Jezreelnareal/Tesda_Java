@@ -179,9 +179,10 @@ mvn exec:java
 | User | `09181234567` | `5678` | PHP 500.00 |
 | Admin | `admin` | `1234` | Not applicable |
 
-These credentials are for development and assessment only. PINs remain in the
-assignment-compatible plain four-digit format and are not suitable for a
-production banking system.
+These credentials are for development and assessment only. Users still enter
+four-digit PINs, but JCash stores only salted PBKDF2-HMAC-SHA-256 hashes. When
+JCash first connects to an older database, it automatically widens the PIN
+columns and hashes legacy plaintext PINs.
 
 ## Manual acceptance test
 
