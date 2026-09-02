@@ -1,24 +1,35 @@
 package service;
 
 import java.sql.SQLException;
+import model.Admin;
 import model.User;
+import repository.AdminRepository;
 import repository.UserRepository;
 
 public final class Auth {
 
     private final UserRepository userRepository;
+    private final AdminRepository adminRepository;
 
     public Auth() {
-        this(new UserRepository());
+        this(new UserRepository(), new AdminRepository());
     }
 
     public Auth(UserRepository userRepository) {
-        if (userRepository == null) {
+        this(userRepository, new AdminRepository());
+    }
+
+    public Auth(
+            UserRepository userRepository,
+            AdminRepository adminRepository
+    ) {
+        if (userRepository == null || adminRepository == null) {
             throw new IllegalArgumentException(
-                    "User repository cannot be null"
+                    "Authentication repositories cannot be null"
             );
         }
         this.userRepository = userRepository;
+        this.adminRepository = adminRepository;
     }
 
     public User authenticate(String mobileNumber, String pin)
@@ -36,6 +47,18 @@ public final class Auth {
         }
 
         return user;
+    }
+
+    public Admin authenticateAdmin(String username, String pin)
+            throws SQLException {
+        if (username == null || pin == null
+                || !username.trim().matches("[A-Za-z0-9_.-]{3,30}")
+                || !pin.trim().matches("\\d{4}")) {
+            return null;
+        }
+
+        Admin admin = adminRepository.findByUsername(username.trim());
+        return admin != null && admin.pin().equals(pin.trim()) ? admin : null;
     }
 
     private static boolean hasValidCredentialFormat(

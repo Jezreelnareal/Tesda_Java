@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import model.TransferTransaction;
+import model.TransferReceipt;
 import model.User;
 import repository.TransactionRepository;
 import repository.UserRepository;
@@ -35,6 +36,15 @@ public final class Transfer {
     }
 
     public User transfer(
+            User sender,
+            String receiverMobileNumber,
+            BigDecimal amount
+    ) throws SQLException {
+        return transferWithReceipt(sender, receiverMobileNumber, amount)
+                .sender();
+    }
+
+    public TransferReceipt transferWithReceipt(
             User sender,
             String receiverMobileNumber,
             BigDecimal amount
@@ -89,6 +99,7 @@ public final class Transfer {
                     );
                 }
 
+                BigDecimal previousSenderBalance = lockedSender.getBalance();
                 lockedSender.withdraw(amount);
                 lockedReceiver.deposit(amount);
                 userRepository.updateBalance(connection, lockedSender);
@@ -119,7 +130,12 @@ public final class Transfer {
 
                 connection.commit();
                 lockedSender.addTransaction(savedTransaction);
-                return lockedSender;
+                return new TransferReceipt(
+                        lockedSender,
+                        lockedReceiver,
+                        previousSenderBalance,
+                        savedTransaction
+                );
             } catch (SQLException | RuntimeException exception) {
                 rollback(connection, exception);
                 throw exception;

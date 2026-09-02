@@ -1,45 +1,45 @@
 ﻿
  Version: 2.1
  Chunks: 1
- Start: 2026-08-31 19:11:45 (UTC)
- Duration: 2 s
+ Start: 2026-09-02 06:51:12 (UTC)
+ Duration: 1 s
 
  Event Type                              Count  Size (bytes) 
 =============================================================
- jdk.ModuleExport                          535          5214
+ jdk.ModuleExport                          535          5198
  jdk.BooleanFlag                           493         14644
- jdk.SocketRead                            420         16282
- jdk.SocketWrite                           420         15648
  jdk.ActiveSetting                         376          9324
- jdk.SystemProcess                         278         16184
+ jdk.SocketRead                            360         13956
+ jdk.SocketWrite                           360         13410
+ jdk.SystemProcess                         267         14824
  jdk.ModuleRequire                         157          1413
- jdk.GCPhaseParallel                       143          3285
+ jdk.GCPhaseParallel                       143          3283
  jdk.LongFlag                              137          4260
+ jdk.ObjectAllocationSample                103          1407
  jdk.NativeLibrary                          99          6712
- jdk.ObjectAllocationSample                 99          1353
  jdk.UnsignedLongFlag                       93          3046
- jdk.Checkpoint                             84        186150
- jdk.Deoptimization                         49          1086
- jdk.InitialEnvironmentVariable             49          3011
+ jdk.Checkpoint                             81        178849
+ jdk.Deoptimization                         52          1152
+ jdk.InitialEnvironmentVariable             48          2982
  jdk.UnsignedIntFlag                        48          1534
- jdk.ExecutionSample                        46           451
  jdk.InitialSecurityProperty                45          2191
  jdk.IntFlag                                44          1519
- jdk.NativeMethodSample                     38           377
+ jdk.NativeMethodSample                     39           389
  jdk.StringFlag                             34          1201
- jdk.ThreadAllocationStatistics             31           262
- jdk.PromoteObjectInNewPLAB                 23           374
+ jdk.ThreadAllocationStatistics             30           254
+ jdk.ExecutionSample                        24           234
+ jdk.PromoteObjectInNewPLAB                 24           393
  jdk.DoubleFlag                             16           629
  jdk.InitialSystemProperty                  16          1877
  jdk.TenuringDistribution                   15           138
- jdk.JavaExceptionThrow                     14           731
- jdk.ExecuteVMOperation                      8           113
- jdk.OldObjectSample                         7           188
+ jdk.JavaExceptionThrow                     14           729
+ jdk.OldObjectSample                        10           278
+ jdk.ExecuteVMOperation                      8           112
  jdk.ClassLoaderStatistics                   6           153
  jdk.CodeCacheStatistics                     6           180
  jdk.GCHeapMemoryPoolUsage                   6           212
- jdk.JavaErrorThrow                          5            67
- jdk.SafepointBegin                          5            56
+ jdk.JavaErrorThrow                          5            66
+ jdk.SafepointBegin                          5            55
  jdk.ThreadStart                             5            51
  jdk.GCReferenceStatistics                   4            37
  jdk.MetaspaceChunkFreeListSummary           4            68
@@ -53,12 +53,15 @@
  jdk.NativeLibraryLoad                       2           131
  jdk.PhysicalMemory                          2            32
  jdk.SwapSpace                               2            32
+ jdk.ThreadCPULoad                           2            30
+ jdk.ThreadEnd                               2            16
  jdk.ActiveRecording                         1           104
  jdk.CPUInformation                          1          1501
  jdk.CPULoad                                 1            18
  jdk.CPUTimeStampCounter                     1            16
  jdk.ClassLoadingStatistics                  1             9
  jdk.CodeCacheConfiguration                  1            43
+ jdk.CompilationFailure                      1            35
  jdk.CompilerConfiguration                   1            10
  jdk.CompilerStatistics                      1            27
  jdk.EvacuationInformation                   1            24
@@ -66,7 +69,7 @@
  jdk.G1AdaptiveIHOP                          1            37
  jdk.G1BasicIHOP                             1            35
  jdk.G1EvacuationOldStatistics               1            30
- jdk.G1EvacuationYoungStatistics             1            41
+ jdk.G1EvacuationYoungStatistics             1            40
  jdk.G1GarbageCollection                     1            11
  jdk.G1MMU                                   1            12
  jdk.GCCPUTime                               1            13
@@ -79,12 +82,10 @@
  jdk.JavaMonitorWait                         1            25
  jdk.JavaThreadStatistics                    1            10
  jdk.Metadata                                1        110521
- jdk.OSInformation                           1           115
+ jdk.OSInformation                           1           114
  jdk.PromoteObjectOutsidePLAB                1            15
  jdk.ResidentSetSize                         1            14
  jdk.Shutdown                                1            46
- jdk.ThreadCPULoad                           1            15
- jdk.ThreadEnd                               1             8
  jdk.ThreadPark                              1            37
  jdk.VirtualizationInformation               1            20
  jdk.YoungGarbageCollection                  1            11
@@ -99,7 +100,6 @@
  jdk.ClassUnload                             0             0
  jdk.CodeCacheFull                           0             0
  jdk.Compilation                             0             0
- jdk.CompilationFailure                      0             0
  jdk.CompilerInlining                        0             0
  jdk.CompilerPhase                           0             0
  jdk.CompilerQueueUtilization                0             0

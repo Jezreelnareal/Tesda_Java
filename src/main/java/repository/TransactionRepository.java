@@ -9,10 +9,13 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import model.AdminCreditTransaction;
+import model.AdminDebitTransaction;
 import model.CashInTransaction;
 import model.Transaction;
 import model.TransactionType;
 import model.TransferTransaction;
+import model.WithdrawalTransaction;
 import util.DatabaseConnection;
 
 public class TransactionRepository {
@@ -34,8 +37,8 @@ public class TransactionRepository {
                 INSERT INTO transactions
                     (transaction_type, amount, details,
                      transaction_date_time, sender_mobile_number,
-                     receiver_mobile_number)
-                VALUES (?, ?, ?, ?, ?, ?)
+                     receiver_mobile_number, admin_username)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
         try (PreparedStatement statement = connection.prepareStatement(
@@ -70,7 +73,7 @@ public class TransactionRepository {
         String sql = """
                 SELECT id, transaction_type, amount, details,
                        transaction_date_time, sender_mobile_number,
-                       receiver_mobile_number
+                       receiver_mobile_number, admin_username
                 FROM transactions
                 WHERE sender_mobile_number = ? OR receiver_mobile_number = ?
                 ORDER BY transaction_date_time DESC, id DESC
@@ -99,7 +102,7 @@ public class TransactionRepository {
         String sql = """
                 SELECT id, transaction_type, amount, details,
                        transaction_date_time, sender_mobile_number,
-                       receiver_mobile_number
+                       receiver_mobile_number, admin_username
                 FROM transactions
                 ORDER BY transaction_date_time DESC, id DESC
                 """;
@@ -138,12 +141,35 @@ public class TransactionRepository {
         if (transaction instanceof CashInTransaction cashIn) {
             statement.setNull(5, Types.VARCHAR);
             statement.setString(6, cashIn.getUserMobileNumber());
+            statement.setNull(7, Types.VARCHAR);
+            return;
+        }
+
+        if (transaction instanceof WithdrawalTransaction withdrawal) {
+            statement.setString(5, withdrawal.getUserMobileNumber());
+            statement.setNull(6, Types.VARCHAR);
+            statement.setNull(7, Types.VARCHAR);
             return;
         }
 
         if (transaction instanceof TransferTransaction transfer) {
             statement.setString(5, transfer.getSenderMobileNumber());
             statement.setString(6, transfer.getReceiverMobileNumber());
+            statement.setNull(7, Types.VARCHAR);
+            return;
+        }
+
+        if (transaction instanceof AdminCreditTransaction credit) {
+            statement.setNull(5, Types.VARCHAR);
+            statement.setString(6, credit.getUserMobileNumber());
+            statement.setString(7, credit.getAdminUsername());
+            return;
+        }
+
+        if (transaction instanceof AdminDebitTransaction debit) {
+            statement.setString(5, debit.getUserMobileNumber());
+            statement.setNull(6, Types.VARCHAR);
+            statement.setString(7, debit.getAdminUsername());
             return;
         }
 
@@ -179,10 +205,36 @@ public class TransactionRepository {
                         resultSet.getTimestamp("transaction_date_time")
                                 .toLocalDateTime()
                 );
+                case WITHDRAWAL -> new WithdrawalTransaction(
+                        id,
+                        resultSet.getString("sender_mobile_number"),
+                        resultSet.getBigDecimal("amount"),
+                        resultSet.getString("details"),
+                        resultSet.getTimestamp("transaction_date_time")
+                                .toLocalDateTime()
+                );
                 case TRANSFER -> new TransferTransaction(
                         id,
                         resultSet.getString("sender_mobile_number"),
                         resultSet.getString("receiver_mobile_number"),
+                        resultSet.getBigDecimal("amount"),
+                        resultSet.getString("details"),
+                        resultSet.getTimestamp("transaction_date_time")
+                                .toLocalDateTime()
+                );
+                case ADMIN_CREDIT -> new AdminCreditTransaction(
+                        id,
+                        resultSet.getString("admin_username"),
+                        resultSet.getString("receiver_mobile_number"),
+                        resultSet.getBigDecimal("amount"),
+                        resultSet.getString("details"),
+                        resultSet.getTimestamp("transaction_date_time")
+                                .toLocalDateTime()
+                );
+                case ADMIN_DEBIT -> new AdminDebitTransaction(
+                        id,
+                        resultSet.getString("admin_username"),
+                        resultSet.getString("sender_mobile_number"),
                         resultSet.getBigDecimal("amount"),
                         resultSet.getString("details"),
                         resultSet.getTimestamp("transaction_date_time")

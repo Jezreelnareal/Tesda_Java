@@ -1,32 +1,38 @@
 param(
     [ValidateRange(1, 10000)]
-    [int]$Iterations = 200,
-
-    [string]$Driver = "C:\Users\jezre\Downloads\mysql-connector-j-26.7.0\mysql-connector-j-26.7.0.jar"
+    [int]$Iterations = 200
 )
 
 $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$outputDirectory = Join-Path $projectRoot "out"
+$outputDirectory = Join-Path $projectRoot "target\classes"
 $resultsDirectory = Join-Path $projectRoot "docs\performance\results"
+$classpathFile = Join-Path $projectRoot "target\performance-classpath.txt"
+$mavenRepository = Join-Path $projectRoot "target\maven-repository"
 
-if (-not (Test-Path -LiteralPath $Driver)) {
-    throw "MySQL Connector/J was not found at: $Driver"
+$mavenCommand = Get-Command mvn -ErrorAction SilentlyContinue
+if ($null -eq $mavenCommand) {
+    $bundledMaven = Get-ChildItem "C:\Program Files\JetBrains" -Recurse `
+        -Filter mvn.cmd -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    if ($null -eq $bundledMaven) {
+        throw "Maven was not found. Install Maven or run this from IntelliJ's Maven tool window."
+    }
+    $mavenExecutable = $bundledMaven.FullName
+} else {
+    $mavenExecutable = $mavenCommand.Source
 }
 
-New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
 New-Item -ItemType Directory -Force -Path $resultsDirectory | Out-Null
-
-$sources = Get-ChildItem (
-    Join-Path $projectRoot "src\main\java"
-) -Recurse -Filter *.java
-
-& javac -d $outputDirectory $sources.FullName
+& $mavenExecutable "-Dmaven.repo.local=$mavenRepository" -q -DskipTests `
+    compile dependency:build-classpath `
+    "-Dmdep.outputFile=$classpathFile"
 if ($LASTEXITCODE -ne 0) {
-    throw "Java compilation failed."
+    throw "Maven compilation or dependency resolution failed."
 }
 
-$classPath = "$outputDirectory;$Driver"
+$dependencies = Get-Content -LiteralPath $classpathFile -Raw
+$classPath = "$outputDirectory;$dependencies"
 foreach ($mode in @("unpooled", "reused")) {
     $recording = Join-Path $resultsDirectory "$mode.jfr"
     $benchmarkLog = Join-Path $resultsDirectory "$mode-benchmark.txt"

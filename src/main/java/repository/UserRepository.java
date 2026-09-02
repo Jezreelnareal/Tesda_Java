@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import model.User;
 import util.DatabaseConnection;
 
@@ -50,6 +52,26 @@ public class UserRepository {
         requireConnection(connection);
         requireMobileNumber(mobileNumber);
         return findByMobileNumber(connection, mobileNumber, false);
+    }
+
+    public List<User> findAll() throws SQLException {
+        String sql = """
+                SELECT mobile_number, pin, full_name, balance
+                FROM users
+                ORDER BY full_name, mobile_number
+                """;
+        List<User> users = new ArrayList<>();
+
+        DatabaseConnection.withReusableConnection(connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(sql);
+                    ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    users.add(mapUser(resultSet));
+                }
+                return null;
+            }
+        });
+        return List.copyOf(users);
     }
 
     public User findByMobileNumberForUpdate(

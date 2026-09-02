@@ -5,8 +5,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import model.CashInTransaction;
+import model.AdminCreditTransaction;
+import model.AdminDebitTransaction;
 import model.Transaction;
 import model.TransferTransaction;
+import model.WithdrawalTransaction;
 import model.User;
 import repository.TransactionRepository;
 
@@ -58,6 +61,19 @@ public final class Logs {
         if (transaction instanceof CashInTransaction) {
             type = "CASH_IN";
             amountPrefix = "+";
+        } else if (transaction instanceof WithdrawalTransaction) {
+            type = "WITHDRAWAL";
+            amountPrefix = "-";
+        } else if (transaction instanceof AdminCreditTransaction credit) {
+            type = "ADMIN CREDIT";
+            amountPrefix = "+";
+            participantDetails = " | Admin: "
+                    + credit.getAdminUsername();
+        } else if (transaction instanceof AdminDebitTransaction debit) {
+            type = "ADMIN DEBIT";
+            amountPrefix = "-";
+            participantDetails = " | Admin: "
+                    + debit.getAdminUsername();
         } else if (transaction instanceof TransferTransaction transfer) {
             if (user.getMobileNumber().equals(
                     transfer.getSenderMobileNumber()

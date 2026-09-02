@@ -5,8 +5,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 import model.CashInTransaction;
+import model.AdminCreditTransaction;
+import model.AdminDebitTransaction;
 import model.Transaction;
 import model.TransferTransaction;
+import model.WithdrawalTransaction;
 import repository.TransactionRepository;
 import service.Balance;
 import util.DatabaseConnection;
@@ -121,6 +124,15 @@ public final class TransactionCleanupTool {
 
         if (transaction instanceof CashInTransaction cashIn) {
             receiver = cashIn.getUserMobileNumber();
+        } else if (transaction instanceof WithdrawalTransaction withdrawal) {
+            sender = withdrawal.getUserMobileNumber();
+            receiver = "-";
+        } else if (transaction instanceof AdminCreditTransaction credit) {
+            receiver = credit.getUserMobileNumber();
+            sender = "Admin " + credit.getAdminUsername();
+        } else if (transaction instanceof AdminDebitTransaction debit) {
+            sender = debit.getUserMobileNumber();
+            receiver = "Admin " + debit.getAdminUsername();
         } else if (transaction instanceof TransferTransaction transfer) {
             sender = transfer.getSenderMobileNumber();
             receiver = transfer.getReceiverMobileNumber();

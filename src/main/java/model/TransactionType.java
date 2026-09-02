@@ -2,5 +2,8 @@ package model;
 
 public enum TransactionType {
     CASH_IN,
-    TRANSFER
+    WITHDRAWAL,
+    TRANSFER,
+    ADMIN_CREDIT,
+    ADMIN_DEBIT
 }
