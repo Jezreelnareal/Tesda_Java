@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -83,11 +82,6 @@ final class AdminDashboardPanel extends JPanel {
             "Administrator",
             UiTheme.NAVY,
             UiTheme.FONT_TITLE.deriveFont(22f)
-    );
-    private final JLabel statusLabel = UiTheme.label(
-            "Ready",
-            UiTheme.MUTED,
-            UiTheme.FONT_PLAIN.deriveFont(12f)
     );
     private final JLabel usersMetric = UiTheme.label("0", UiTheme.NAVY,
             UiTheme.FONT_BALANCE.deriveFont(25f));
@@ -210,12 +204,7 @@ final class AdminDashboardPanel extends JPanel {
         JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
         header.add(identityLabel, BorderLayout.WEST);
-        statusLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        JPanel headerActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        headerActions.setOpaque(false);
-        headerActions.add(statusLabel);
-        headerActions.add(UiTheme.themeButton(owner));
-        header.add(headerActions, BorderLayout.EAST);
+        header.add(UiTheme.themeButton(owner), BorderLayout.EAST);
 
         JPanel metrics = new JPanel(new GridLayout(1, 3, 14, 0));
         metrics.setOpaque(false);
@@ -228,9 +217,16 @@ final class AdminDashboardPanel extends JPanel {
         accountTable.setAutoCreateRowSorter(true);
         accountTable.setRowSorter(accountSorter);
         accountTable.setFillsViewportHeight(true);
+        accountTable.setForeground(UiTheme.TEXT);
+        accountTable.setBackground(UiTheme.SURFACE);
+        accountTable.setGridColor(UiTheme.BORDER);
+        accountTable.setShowVerticalLines(false);
         accountTable.getTableHeader().setFont(UiTheme.FONT_MEDIUM);
+        accountTable.getTableHeader().setForeground(UiTheme.NAVY);
+        centerTableText(accountTable);
         JScrollPane scrollPane = new JScrollPane(accountTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(UiTheme.BORDER));
+        scrollPane.getViewport().setBackground(UiTheme.SURFACE);
 
         JPanel tablePanel = new JPanel(new BorderLayout(0, 12));
         tablePanel.setOpaque(false);
@@ -256,14 +252,24 @@ final class AdminDashboardPanel extends JPanel {
         recentTable.setFont(UiTheme.FONT_PLAIN.deriveFont(12f));
         recentTable.setRowHeight(28);
         recentTable.setFillsViewportHeight(true);
+        recentTable.setForeground(UiTheme.TEXT);
+        recentTable.setBackground(UiTheme.SURFACE);
+        recentTable.setGridColor(UiTheme.BORDER);
+        recentTable.setShowVerticalLines(false);
         recentTable.getTableHeader().setFont(UiTheme.FONT_MEDIUM);
+        recentTable.getTableHeader().setForeground(UiTheme.NAVY);
         centerTableText(recentTable);
         JPanel recentPanel = new JPanel(new BorderLayout(0, 8));
         recentPanel.setOpaque(false);
         recentPanel.setPreferredSize(new Dimension(0, 190));
         recentPanel.add(UiTheme.label("Recent system activity", UiTheme.NAVY,
                 UiTheme.FONT_TITLE.deriveFont(18f)), BorderLayout.NORTH);
-        recentPanel.add(new JScrollPane(recentTable), BorderLayout.CENTER);
+        JScrollPane recentScrollPane = new JScrollPane(recentTable);
+        recentScrollPane.setBorder(
+                BorderFactory.createLineBorder(UiTheme.BORDER)
+        );
+        recentScrollPane.getViewport().setBackground(UiTheme.SURFACE);
+        recentPanel.add(recentScrollPane, BorderLayout.CENTER);
 
         JPanel center = new JPanel(new BorderLayout(0, 16));
         center.setOpaque(false);
@@ -311,7 +317,6 @@ final class AdminDashboardPanel extends JPanel {
             List<User> users = (List<User>) values[0];
             populateAccounts(users);
             populateMetrics((SystemReport) values[1]);
-            setStatus(users.size() + " account(s)", UiTheme.SUCCESS);
         });
     }
 
@@ -428,19 +433,32 @@ final class AdminDashboardPanel extends JPanel {
         JTextField nameField = UiTheme.styleField(new JTextField());
         JTextField mobileField = UiTheme.styleField(new JTextField());
         JPasswordField pinField = new JPasswordField();
+        JPasswordField confirmPinField = new JPasswordField();
         UiTheme.styleField(pinField);
+        UiTheme.styleField(confirmPinField);
+        UiTheme.installPasswordVisibilityToggle(pinField);
+        UiTheme.installPasswordVisibilityToggle(confirmPinField);
         JPanel form = verticalForm();
         addField(form, "Full name", nameField);
         form.add(Box.createVerticalStrut(10));
         addField(form, "Mobile/account number", mobileField);
         form.add(Box.createVerticalStrut(10));
         addField(form, "4-digit PIN", pinField);
+        form.add(Box.createVerticalStrut(10));
+        addField(form, "Confirm PIN", confirmPinField);
         if (!UiDialogs.form(owner, "Create new account", form,
                 "Create account")) {
             return;
         }
 
         String pin = new String(pinField.getPassword()).trim();
+        String confirmation = new String(
+                confirmPinField.getPassword()
+        ).trim();
+        if (!pin.equals(confirmation)) {
+            showError("PINs do not match", "Enter the same PIN twice.");
+            return;
+        }
         runTask(
                 "Creating account...",
                 () -> service.createAccount(
@@ -570,7 +588,6 @@ final class AdminDashboardPanel extends JPanel {
             Consumer<T> success
     ) {
         setBusy(true);
-        setStatus(progress, UiTheme.MUTED);
         new SwingWorker<T, Void>() {
             @Override
             protected T doInBackground() throws Exception {
@@ -581,7 +598,6 @@ final class AdminDashboardPanel extends JPanel {
             protected void done() {
                 try {
                     success.accept(get());
-                    setStatus("Ready", UiTheme.SUCCESS);
                 } catch (InterruptedException exception) {
                     Thread.currentThread().interrupt();
                     showFailure(exception);
@@ -599,7 +615,6 @@ final class AdminDashboardPanel extends JPanel {
                 && exception.getMessage() != null
                 ? exception.getMessage()
                 : "The database operation could not be completed.";
-        setStatus("Operation failed", UiTheme.DANGER);
         showError("Unable to complete request", message);
     }
 
@@ -607,11 +622,6 @@ final class AdminDashboardPanel extends JPanel {
         for (JButton button : controls) {
             button.setEnabled(!busy);
         }
-    }
-
-    private void setStatus(String text, Color color) {
-        statusLabel.setText(text);
-        statusLabel.setForeground(color);
     }
 
     private void updateResponsiveLayout() {
@@ -661,7 +671,10 @@ final class AdminDashboardPanel extends JPanel {
         panel.add(label);
         panel.add(Box.createVerticalStrut(6));
         field.setAlignmentX(Component.LEFT_ALIGNMENT);
-        field.setMaximumSize(new Dimension(360, 42));
+        Dimension preferred = field.getPreferredSize();
+        field.setPreferredSize(new Dimension(preferred.width, 44));
+        field.setMinimumSize(new Dimension(0, 44));
+        field.setMaximumSize(new Dimension(360, 44));
         panel.add(field);
     }
 

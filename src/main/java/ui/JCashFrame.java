@@ -26,7 +26,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JComboBox;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,6 +40,7 @@ import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -71,6 +71,7 @@ public final class JCashFrame extends JFrame {
     private static final String LANDING_CARD = "landing";
     private static final String LOGIN_CARD = "login";
     private static final String ADMIN_LOGIN_CARD = "admin-login";
+    private static final String REGISTRATION_CARD = "registration";
     private static final String DASHBOARD_CARD = "dashboard";
     private static final String ADMIN_DASHBOARD_CARD = "admin-dashboard";
     private static final String OVERVIEW_CARD = "overview";
@@ -97,13 +98,13 @@ public final class JCashFrame extends JFrame {
     private JTextField mobileNumberField;
     private JPasswordField pinField;
     private JButton loginButton;
+    private JButton registrationButton;
     private JButton retryConnectionButton;
     private JLabel loginStatusLabel;
     private JLabel attemptsLabel;
     private JLabel welcomeLabel;
     private JLabel mobileLabel;
     private JLabel balanceLabel;
-    private JLabel dashboardStatusLabel;
     private DefaultTableModel transactionTableModel;
     private JTable transactionTable;
     private DefaultTableModel recentTableModel;
@@ -122,6 +123,13 @@ public final class JCashFrame extends JFrame {
     private JButton adminRetryConnectionButton;
     private JLabel adminLoginStatusLabel;
     private JLabel adminAttemptsLabel;
+    private JTextField registrationNameField;
+    private JTextField registrationMobileField;
+    private JPasswordField registrationPinField;
+    private JPasswordField registrationConfirmPinField;
+    private JButton registrationSubmitButton;
+    private JButton registrationRetryConnectionButton;
+    private JLabel registrationStatusLabel;
     private AdminDashboardPanel adminDashboardPanel;
 
     private User currentUser;
@@ -136,6 +144,10 @@ public final class JCashFrame extends JFrame {
         applicationPanel.add(createLandingPanel(), LANDING_CARD);
         applicationPanel.add(createLoginPanel(), LOGIN_CARD);
         applicationPanel.add(createAdminLoginPanel(), ADMIN_LOGIN_CARD);
+        applicationPanel.add(
+                createRegistrationPanel(),
+                REGISTRATION_CARD
+        );
         applicationPanel.add(createDashboardPanel(), DASHBOARD_CARD);
         adminDashboardPanel = new AdminDashboardPanel(
                 this,
@@ -178,10 +190,8 @@ public final class JCashFrame extends JFrame {
 
         JPanel area = new JPanel(new GridBagLayout());
         area.setBackground(UiTheme.BACKGROUND);
-        UiTheme.RoundedPanel card = new UiTheme.RoundedPanel(
-                UiTheme.SURFACE,
-                24
-        );
+        JPanel card = new JPanel();
+        card.setOpaque(false);
         card.setPreferredSize(new Dimension(410, 390));
         card.setBorder(new EmptyBorder(40, 44, 38, 44));
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
@@ -204,15 +214,19 @@ public final class JCashFrame extends JFrame {
         JButton adminButton = fullWidthButton(
                 UiTheme.darkButton("Admin login")
         );
-        JButton exitButton = fullWidthButton(UiTheme.lightButton("Exit"));
+        registrationButton = fullWidthButton(
+                UiTheme.textButton("Create account")
+        );
         userButton.addActionListener(event -> showUserLogin());
         adminButton.addActionListener(event -> showAdminLogin());
-        exitButton.addActionListener(event -> exitApplication());
+        registrationButton.addActionListener(
+                event -> showRegistration()
+        );
         card.add(userButton);
         card.add(Box.createVerticalStrut(14));
         card.add(adminButton);
         card.add(Box.createVerticalStrut(14));
-        card.add(exitButton);
+        card.add(registrationButton);
         area.add(card);
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setOpaque(false);
@@ -236,12 +250,35 @@ public final class JCashFrame extends JFrame {
     private JPanel withThemeBar(JPanel content) {
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setOpaque(false);
-        JPanel themeBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 18, 16));
+        JPanel themeBar = new JPanel(new BorderLayout());
         themeBar.setOpaque(false);
-        themeBar.add(UiTheme.themeButton(this));
+        themeBar.setBorder(new EmptyBorder(16, 18, 16, 18));
+        themeBar.add(createBackButton(), BorderLayout.WEST);
+        themeBar.add(UiTheme.themeButton(this), BorderLayout.EAST);
         wrapper.add(themeBar, BorderLayout.NORTH);
         wrapper.add(content, BorderLayout.CENTER);
         return wrapper;
+    }
+
+    private JButton createBackButton() {
+        JButton button = UiTheme.lightButton("");
+        Dimension size = new Dimension(42, 42);
+        button.setIcon(new UiIcon(UiIcon.Kind.CHEVRON_LEFT, 20));
+        button.setPreferredSize(size);
+        button.setMinimumSize(size);
+        button.setMaximumSize(size);
+        button.setToolTipText("Back to welcome");
+        button.getAccessibleContext().setAccessibleName("Back to welcome");
+        button.getAccessibleContext().setAccessibleDescription(
+                "Return to the welcome screen"
+        );
+        button.addActionListener(
+                event -> {
+                    hideAllPasswordFields();
+                    applicationCards.show(applicationPanel, LANDING_CARD);
+                }
+        );
+        return button;
     }
 
     private JPanel createBrandPanel() {
@@ -285,14 +322,12 @@ public final class JCashFrame extends JFrame {
     private JPanel createLoginFormArea() {
         JPanel formArea = new JPanel(new GridBagLayout());
         formArea.setBackground(UiTheme.BACKGROUND);
-        formArea.setBorder(new EmptyBorder(30, 35, 30, 35));
+        formArea.setBorder(new EmptyBorder(10, 35, 50, 35));
 
-        UiTheme.RoundedPanel card = new UiTheme.RoundedPanel(
-                UiTheme.SURFACE,
-                24
-        );
-        card.setPreferredSize(new Dimension(390, 480));
-        card.setBorder(new EmptyBorder(38, 42, 36, 42));
+        JPanel card = new JPanel();
+        card.setOpaque(false);
+        card.setPreferredSize(new Dimension(390, 400));
+        card.setBorder(new EmptyBorder(12, 42, 12, 42));
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
 
         JLabel title = UiTheme.label(
@@ -310,6 +345,7 @@ public final class JCashFrame extends JFrame {
         pinField = new JPasswordField();
         UiTheme.styleField(mobileNumberField);
         UiTheme.styleField(pinField);
+        UiTheme.installPasswordVisibilityToggle(pinField);
         installDigitsOnlyFilter(mobileNumberField, 11);
         installDigitsOnlyFilter(pinField, 4);
 
@@ -329,13 +365,6 @@ public final class JCashFrame extends JFrame {
         retryConnectionButton.addActionListener(
                 event -> checkDatabaseConnection()
         );
-        JButton backButton = fullWidthButton(
-                UiTheme.lightButton("Back to welcome")
-        );
-        backButton.addActionListener(
-                event -> applicationCards.show(applicationPanel, LANDING_CARD)
-        );
-
         loginStatusLabel = UiTheme.label(
                 "Connecting to JCash...",
                 UiTheme.MUTED,
@@ -347,6 +376,7 @@ public final class JCashFrame extends JFrame {
                 UiTheme.FONT_PLAIN.deriveFont(12f)
         );
 
+        card.add(Box.createVerticalGlue());
         addLeftAligned(card, title);
         card.add(Box.createVerticalStrut(6));
         addLeftAligned(card, subtitle);
@@ -354,12 +384,6 @@ public final class JCashFrame extends JFrame {
         addField(card, "Mobile number", mobileNumberField);
         card.add(Box.createVerticalStrut(16));
         addField(card, "4-digit PIN", pinField);
-        JCheckBox showPin = new JCheckBox("Show PIN");
-        showPin.setOpaque(false);
-        showPin.setFont(UiTheme.FONT_PLAIN.deriveFont(12f));
-        showPin.addActionListener(event -> pinField.setEchoChar(
-                showPin.isSelected() ? (char) 0 : '\u2022'));
-        addLeftAligned(card, showPin);
         card.add(Box.createVerticalStrut(11));
         addLeftAligned(card, attemptsLabel);
         card.add(Box.createVerticalStrut(18));
@@ -368,8 +392,7 @@ public final class JCashFrame extends JFrame {
         addLeftAligned(card, loginStatusLabel);
         card.add(Box.createVerticalStrut(10));
         card.add(retryConnectionButton);
-        card.add(Box.createVerticalStrut(10));
-        card.add(backButton);
+        card.add(Box.createVerticalGlue());
 
         formArea.add(card);
         return formArea;
@@ -382,17 +405,17 @@ public final class JCashFrame extends JFrame {
 
         JPanel area = new JPanel(new GridBagLayout());
         area.setBackground(UiTheme.BACKGROUND);
-        UiTheme.RoundedPanel card = new UiTheme.RoundedPanel(
-                UiTheme.SURFACE,
-                24
-        );
-        card.setPreferredSize(new Dimension(390, 480));
-        card.setBorder(new EmptyBorder(38, 42, 36, 42));
+        area.setBorder(new EmptyBorder(10, 35, 50, 35));
+        JPanel card = new JPanel();
+        card.setOpaque(false);
+        card.setPreferredSize(new Dimension(390, 400));
+        card.setBorder(new EmptyBorder(12, 42, 12, 42));
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
 
         adminUsernameField = UiTheme.styleField(new JTextField());
         adminPinField = new JPasswordField();
         UiTheme.styleField(adminPinField);
+        UiTheme.installPasswordVisibilityToggle(adminPinField);
         installDigitsOnlyFilter(adminPinField, 4);
         adminLoginButton = fullWidthButton(
                 UiTheme.primaryButton("Sign in as admin")
@@ -407,12 +430,6 @@ public final class JCashFrame extends JFrame {
         adminRetryConnectionButton.addActionListener(
                 event -> checkDatabaseConnection()
         );
-        JButton backButton = fullWidthButton(
-                UiTheme.lightButton("Back to welcome")
-        );
-        backButton.addActionListener(
-                event -> applicationCards.show(applicationPanel, LANDING_CARD)
-        );
         adminLoginStatusLabel = UiTheme.label(
                 "Connecting to JCash...",
                 UiTheme.MUTED,
@@ -424,6 +441,7 @@ public final class JCashFrame extends JFrame {
                 UiTheme.FONT_PLAIN.deriveFont(12f)
         );
 
+        card.add(Box.createVerticalGlue());
         addLeftAligned(card, UiTheme.label(
                 "Administrator access",
                 UiTheme.NAVY,
@@ -439,12 +457,6 @@ public final class JCashFrame extends JFrame {
         addField(card, "Admin username", adminUsernameField);
         card.add(Box.createVerticalStrut(14));
         addField(card, "4-digit PIN", adminPinField);
-        JCheckBox showAdminPin = new JCheckBox("Show PIN");
-        showAdminPin.setOpaque(false);
-        showAdminPin.setFont(UiTheme.FONT_PLAIN.deriveFont(12f));
-        showAdminPin.addActionListener(event -> adminPinField.setEchoChar(
-                showAdminPin.isSelected() ? (char) 0 : '\u2022'));
-        addLeftAligned(card, showAdminPin);
         card.add(Box.createVerticalStrut(10));
         addLeftAligned(card, adminAttemptsLabel);
         card.add(Box.createVerticalStrut(16));
@@ -453,9 +465,90 @@ public final class JCashFrame extends JFrame {
         addLeftAligned(card, adminLoginStatusLabel);
         card.add(Box.createVerticalStrut(9));
         card.add(adminRetryConnectionButton);
-        card.add(Box.createVerticalStrut(9));
-        card.add(backButton);
+        card.add(Box.createVerticalGlue());
         area.add(card);
+        panel.add(withThemeBar(area), BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JPanel createRegistrationPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(UiTheme.BACKGROUND);
+        panel.add(createBrandPanel(), BorderLayout.WEST);
+
+        JPanel area = new JPanel(new GridBagLayout());
+        area.setBackground(UiTheme.BACKGROUND);
+        area.setBorder(new EmptyBorder(0, 35, 20, 35));
+
+        JPanel form = new JPanel();
+        form.setOpaque(false);
+        form.setPreferredSize(new Dimension(430, 465));
+        form.setBorder(new EmptyBorder(8, 36, 8, 36));
+        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
+
+        registrationNameField = UiTheme.styleField(new JTextField());
+        registrationMobileField = UiTheme.styleField(new JTextField());
+        registrationPinField = new JPasswordField();
+        registrationConfirmPinField = new JPasswordField();
+        UiTheme.styleField(registrationPinField);
+        UiTheme.styleField(registrationConfirmPinField);
+        UiTheme.installPasswordVisibilityToggle(registrationPinField);
+        UiTheme.installPasswordVisibilityToggle(registrationConfirmPinField);
+        installDigitsOnlyFilter(registrationMobileField, 11);
+        installDigitsOnlyFilter(registrationPinField, 4);
+        installDigitsOnlyFilter(registrationConfirmPinField, 4);
+
+        registrationSubmitButton = fullWidthButton(
+                UiTheme.primaryButton("Create account")
+        );
+        registrationSubmitButton.setEnabled(false);
+        registrationSubmitButton.addActionListener(
+                event -> attemptRegistration()
+        );
+        registrationConfirmPinField.addActionListener(
+                event -> attemptRegistration()
+        );
+
+        registrationRetryConnectionButton = fullWidthButton(
+                UiTheme.lightButton("Retry connection")
+        );
+        registrationRetryConnectionButton.setVisible(false);
+        registrationRetryConnectionButton.addActionListener(
+                event -> checkDatabaseConnection()
+        );
+        registrationStatusLabel = UiTheme.label(
+                "Connecting to JCash...",
+                UiTheme.MUTED,
+                UiTheme.FONT_PLAIN.deriveFont(12f)
+        );
+
+        addLeftAligned(form, UiTheme.label(
+                "Create your account",
+                UiTheme.NAVY,
+                UiTheme.FONT_TITLE
+        ));
+        form.add(Box.createVerticalStrut(5));
+        addLeftAligned(form, UiTheme.label(
+                "Start with a secure, zero-balance JCash account.",
+                UiTheme.MUTED,
+                UiTheme.FONT_PLAIN
+        ));
+        form.add(Box.createVerticalStrut(16));
+        addField(form, "Full name", registrationNameField);
+        form.add(Box.createVerticalStrut(8));
+        addField(form, "Mobile number", registrationMobileField);
+        form.add(Box.createVerticalStrut(8));
+        addField(form, "4-digit PIN", registrationPinField);
+        form.add(Box.createVerticalStrut(8));
+        addField(form, "Confirm PIN", registrationConfirmPinField);
+        form.add(Box.createVerticalStrut(14));
+        form.add(registrationSubmitButton);
+        form.add(Box.createVerticalStrut(8));
+        addLeftAligned(form, registrationStatusLabel);
+        form.add(Box.createVerticalStrut(8));
+        form.add(registrationRetryConnectionButton);
+
+        area.add(form);
         panel.add(withThemeBar(area), BorderLayout.CENTER);
         return panel;
     }
@@ -546,15 +639,8 @@ public final class JCashFrame extends JFrame {
         identity.add(Box.createVerticalStrut(3));
         identity.add(mobileLabel);
 
-        dashboardStatusLabel = UiTheme.label(
-                "Ready",
-                UiTheme.MUTED,
-                UiTheme.FONT_PLAIN.deriveFont(12f)
-        );
-        dashboardStatusLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         JPanel headerActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         headerActions.setOpaque(false);
-        headerActions.add(dashboardStatusLabel);
         headerActions.add(UiTheme.themeButton(this));
         header.add(identity, BorderLayout.WEST);
         header.add(headerActions, BorderLayout.EAST);
@@ -791,6 +877,29 @@ public final class JCashFrame extends JFrame {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setFillsViewportHeight(true);
         table.getTableHeader().setFont(UiTheme.FONT_MEDIUM);
+
+        DefaultTableCellRenderer centeredCells =
+                new DefaultTableCellRenderer();
+        centeredCells.setHorizontalAlignment(SwingConstants.CENTER);
+        table.setDefaultRenderer(Object.class, centeredCells);
+
+        TableCellRenderer headerRenderer =
+                table.getTableHeader().getDefaultRenderer();
+        table.getTableHeader().setDefaultRenderer((headerTable, value,
+                selected, focused, row, column) -> {
+            Component component = headerRenderer.getTableCellRendererComponent(
+                    headerTable,
+                    value,
+                    selected,
+                    focused,
+                    row,
+                    column
+            );
+            if (component instanceof JLabel label) {
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+            }
+            return component;
+        });
     }
 
     private void applyTransactionFilter() {
@@ -813,10 +922,13 @@ public final class JCashFrame extends JFrame {
         databaseAvailable = false;
         loginButton.setEnabled(false);
         adminLoginButton.setEnabled(false);
+        registrationSubmitButton.setEnabled(false);
         retryConnectionButton.setVisible(false);
         adminRetryConnectionButton.setVisible(false);
+        registrationRetryConnectionButton.setVisible(false);
         setLoginStatus("Connecting to JCash...", UiTheme.MUTED);
         setAdminLoginStatus("Connecting to JCash...", UiTheme.MUTED);
+        setRegistrationStatus("Connecting to JCash...", UiTheme.MUTED);
 
         new SwingWorker<Void, Void>() {
             @Override
@@ -836,8 +948,13 @@ public final class JCashFrame extends JFrame {
                     adminLoginButton.setEnabled(
                             failedAdminLoginAttempts < MAX_LOGIN_ATTEMPTS
                     );
+                    registrationSubmitButton.setEnabled(true);
                     setLoginStatus("Database connected", UiTheme.SUCCESS);
                     setAdminLoginStatus(
+                            "Database connected",
+                            UiTheme.SUCCESS
+                    );
+                    setRegistrationStatus(
                             "Database connected",
                             UiTheme.SUCCESS
                     );
@@ -855,10 +972,13 @@ public final class JCashFrame extends JFrame {
         databaseAvailable = false;
         loginButton.setEnabled(false);
         adminLoginButton.setEnabled(false);
+        registrationSubmitButton.setEnabled(false);
         retryConnectionButton.setVisible(true);
         adminRetryConnectionButton.setVisible(true);
+        registrationRetryConnectionButton.setVisible(true);
         setLoginStatus("Database unavailable", UiTheme.DANGER);
         setAdminLoginStatus("Database unavailable", UiTheme.DANGER);
+        setRegistrationStatus("Database unavailable", UiTheme.DANGER);
         showError(
                 "Connection unavailable",
                 "Start MySQL and verify the JCash database configuration."
@@ -875,9 +995,121 @@ public final class JCashFrame extends JFrame {
         adminUsernameField.requestFocusInWindow();
     }
 
-    private void exitApplication() {
-        DatabaseConnection.shutdown();
-        dispose();
+    private void showRegistration() {
+        applicationCards.show(applicationPanel, REGISTRATION_CARD);
+        registrationNameField.requestFocusInWindow();
+    }
+
+    private void attemptRegistration() {
+        if (!databaseAvailable) {
+            setRegistrationStatus(
+                    "Database unavailable. Retry the connection.",
+                    UiTheme.DANGER
+            );
+            return;
+        }
+
+        String fullName = registrationNameField.getText().trim();
+        String mobileNumber = registrationMobileField.getText().trim();
+        String pin = new String(registrationPinField.getPassword()).trim();
+        String confirmation = new String(
+                registrationConfirmPinField.getPassword()
+        ).trim();
+        if (fullName.isBlank()) {
+            setRegistrationStatus("Enter your full name.", UiTheme.DANGER);
+            registrationNameField.requestFocusInWindow();
+            return;
+        }
+        if (fullName.length() > 100) {
+            setRegistrationStatus(
+                    "Full name cannot exceed 100 characters.",
+                    UiTheme.DANGER
+            );
+            registrationNameField.requestFocusInWindow();
+            return;
+        }
+        if (!mobileNumber.matches("09\\d{9}")) {
+            setRegistrationStatus(
+                    "Enter 11 digits beginning with 09.",
+                    UiTheme.DANGER
+            );
+            registrationMobileField.requestFocusInWindow();
+            return;
+        }
+        if (!pin.matches("\\d{4}")) {
+            setRegistrationStatus("Enter a four-digit PIN.", UiTheme.DANGER);
+            registrationPinField.requestFocusInWindow();
+            return;
+        }
+        if (!pin.equals(confirmation)) {
+            setRegistrationStatus("Enter the same PIN twice.", UiTheme.DANGER);
+            registrationConfirmPinField.requestFocusInWindow();
+            return;
+        }
+
+        registerUser(fullName, mobileNumber, pin);
+    }
+
+    private void registerUser(
+            String fullName,
+            String mobileNumber,
+            String pin
+    ) {
+        setRegistrationBusy(true);
+        setRegistrationStatus("Creating your account...", UiTheme.MUTED);
+        new SwingWorker<User, Void>() {
+            @Override
+            protected User doInBackground() throws SQLException {
+                return adminAccountService.createAccount(
+                        fullName,
+                        mobileNumber,
+                        pin
+                );
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    User registeredUser = get();
+                    mobileNumberField.setText(
+                            registeredUser.getMobileNumber()
+                    );
+                    pinField.setText("");
+                    clearRegistrationForm();
+                    setLoginBusy(false);
+                    applicationCards.show(applicationPanel, LOGIN_CARD);
+                    boolean loginLocked = failedLoginAttempts
+                            >= MAX_LOGIN_ATTEMPTS;
+                    setLoginStatus(loginLocked
+                                    ? "Account created. Restart JCash to sign in."
+                                    : "Account created. Enter your PIN to sign in.",
+                            loginLocked ? UiTheme.WARNING : UiTheme.SUCCESS);
+                    UiDialogs.toast(JCashFrame.this, "Account created");
+                    if (!loginLocked) {
+                        pinField.requestFocusInWindow();
+                    }
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                    showRegistrationFailure(exception);
+                } catch (ExecutionException exception) {
+                    showRegistrationFailure(exception.getCause());
+                } finally {
+                    setRegistrationBusy(false);
+                }
+            }
+        }.execute();
+    }
+
+    private void showRegistrationFailure(Throwable exception) {
+        String message;
+        if (exception instanceof IllegalArgumentException
+                && exception.getMessage() != null) {
+            message = exception.getMessage();
+        } else {
+            message = "The account could not be created. Check the database "
+                    + "connection and try again.";
+        }
+        setRegistrationStatus(message, UiTheme.DANGER);
     }
 
     private void attemptLogin() {
@@ -926,7 +1158,6 @@ public final class JCashFrame extends JFrame {
                             applicationPanel,
                             DASHBOARD_CARD
                     );
-                    setDashboardStatus("Ready", UiTheme.MUTED);
                 } catch (InterruptedException exception) {
                     Thread.currentThread().interrupt();
                     showAuthenticationFailure();
@@ -1289,15 +1520,6 @@ public final class JCashFrame extends JFrame {
                 recentTableModel.addRow(new Object[]{row[0], row[1], row[2]});
             }
         }
-        if (transactions.isEmpty()) {
-            setDashboardStatus("No transactions found", UiTheme.MUTED);
-        } else {
-            setDashboardStatus(
-                    transactions.size() + " transaction"
-                            + (transactions.size() == 1 ? "" : "s"),
-                    UiTheme.SUCCESS
-            );
-        }
     }
 
     private void refreshTransactionsSilently() {
@@ -1320,7 +1542,7 @@ public final class JCashFrame extends JFrame {
                 } catch (InterruptedException exception) {
                     Thread.currentThread().interrupt();
                 } catch (ExecutionException ignored) {
-                    setDashboardStatus("Could not refresh activity", UiTheme.WARNING);
+                    // A silent refresh leaves the existing table unchanged.
                 }
             }
         }.execute();
@@ -1396,11 +1618,22 @@ public final class JCashFrame extends JFrame {
     private void clearLoginForm() {
         mobileNumberField.setText("");
         pinField.setText("");
+        UiTheme.hidePassword(pinField);
     }
 
     private void clearAdminLoginForm() {
         adminUsernameField.setText("");
         adminPinField.setText("");
+        UiTheme.hidePassword(adminPinField);
+    }
+
+    private void clearRegistrationForm() {
+        registrationNameField.setText("");
+        registrationMobileField.setText("");
+        registrationPinField.setText("");
+        registrationConfirmPinField.setText("");
+        UiTheme.hidePassword(registrationPinField);
+        UiTheme.hidePassword(registrationConfirmPinField);
     }
 
     private void resetLoginFeedback() {
@@ -1462,7 +1695,6 @@ public final class JCashFrame extends JFrame {
             Consumer<T> successHandler
     ) {
         setDashboardBusy(true);
-        setDashboardStatus(progressMessage, UiTheme.MUTED);
 
         new SwingWorker<T, Void>() {
             @Override
@@ -1476,7 +1708,6 @@ public final class JCashFrame extends JFrame {
                     T result = get();
                     successHandler.accept(result);
                     if (!progressMessage.startsWith("Loading")) {
-                        setDashboardStatus("Ready", UiTheme.SUCCESS);
                         refreshTransactionsSilently();
                     }
                 } catch (InterruptedException exception) {
@@ -1500,7 +1731,6 @@ public final class JCashFrame extends JFrame {
             message = "The database operation could not be completed. "
                     + "Check MySQL and try again.";
         }
-        setDashboardStatus("Operation failed", UiTheme.DANGER);
         showError("Unable to complete request", message);
     }
 
@@ -1524,6 +1754,15 @@ public final class JCashFrame extends JFrame {
         );
     }
 
+    private void setRegistrationBusy(boolean busy) {
+        registrationNameField.setEnabled(!busy);
+        registrationMobileField.setEnabled(!busy);
+        registrationPinField.setEnabled(!busy);
+        registrationConfirmPinField.setEnabled(!busy);
+        registrationSubmitButton.setEnabled(!busy && databaseAvailable);
+        registrationRetryConnectionButton.setEnabled(!busy);
+    }
+
     private void setDashboardBusy(boolean busy) {
         for (JButton control : dashboardControls) {
             control.setEnabled(!busy);
@@ -1540,9 +1779,9 @@ public final class JCashFrame extends JFrame {
         adminLoginStatusLabel.setForeground(color);
     }
 
-    private void setDashboardStatus(String message, Color color) {
-        dashboardStatusLabel.setText(message);
-        dashboardStatusLabel.setForeground(color);
+    private void setRegistrationStatus(String message, Color color) {
+        registrationStatusLabel.setText(message);
+        registrationStatusLabel.setForeground(color);
     }
 
     private JPanel createDialogForm(
@@ -1577,7 +1816,10 @@ public final class JCashFrame extends JFrame {
         addLeftAligned(panel, label);
         panel.add(Box.createVerticalStrut(7));
         field.setAlignmentX(Component.LEFT_ALIGNMENT);
-        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        Dimension preferred = field.getPreferredSize();
+        field.setPreferredSize(new Dimension(preferred.width, 44));
+        field.setMinimumSize(new Dimension(0, 44));
+        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         panel.add(field);
     }
 
@@ -1624,6 +1866,13 @@ public final class JCashFrame extends JFrame {
         ((AbstractDocument) field.getDocument()).setDocumentFilter(
                 new DigitsOnlyFilter(maximumLength)
         );
+    }
+
+    private void hideAllPasswordFields() {
+        UiTheme.hidePassword(pinField);
+        UiTheme.hidePassword(adminPinField);
+        UiTheme.hidePassword(registrationPinField);
+        UiTheme.hidePassword(registrationConfirmPinField);
     }
 
     private void showError(String title, String message) {
@@ -1687,7 +1936,7 @@ public final class JCashFrame extends JFrame {
             extends DefaultTableCellRenderer {
 
         private AmountCellRenderer() {
-            setHorizontalAlignment(SwingConstants.RIGHT);
+            setHorizontalAlignment(SwingConstants.CENTER);
         }
 
         @Override

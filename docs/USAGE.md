@@ -19,6 +19,7 @@ number and PIN; administrators sign in with their admin username and PIN.
 
 ## User features
 
+- Create a new zero-balance account from the welcome screen
 - View balance and account details
 - Cash in and withdraw funds
 - Transfer funds to another registered mobile number

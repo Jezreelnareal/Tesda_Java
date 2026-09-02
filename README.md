@@ -9,6 +9,7 @@ performance benchmarking.
 
 ### User features
 
+- Create a new zero-balance account from the welcome screen
 - Sign in with a registered mobile number and four-digit PIN
 - View the current balance and account details
 - Cash in and withdraw funds
@@ -118,16 +119,20 @@ balances are deterministic.
 
 ### 1. Navigation and login
 
-1. Launch JCash and confirm that **User login**, **Admin login**, and **Exit**
-   are available.
+1. Launch JCash and confirm that **User login**, **Admin login**, and
+   **Create account** are available in that order.
 2. Select **Dark mode**, confirm that the screen remains readable, then switch
    back to light mode. Resize the window below 1,050 pixels and confirm that
    the signed-in sidebar changes to its compact icon layout.
-3. On either login form, confirm that **Show PIN** reveals and hides the PIN.
-4. Enter an incorrect user PIN and confirm that the remaining-attempt count
+3. On either login form, confirm that the eye icon inside the PIN field reveals
+   and hides the PIN.
+4. Open the dedicated account-creation screen, confirm that mismatched PINs
+   are rejected inline, and verify that successful registration opens the user
+   login with the mobile number filled in.
+5. Enter an incorrect user PIN and confirm that the remaining-attempt count
    decreases.
-5. Restart the application if needed, then sign in as `09171234567` / `1234`.
-6. Confirm that Juan Dela Cruz, a PHP 1,000.00 balance, and recent-activity
+6. Restart the application if needed, then sign in as `09171234567` / `1234`.
+7. Confirm that Juan Dela Cruz, a PHP 1,000.00 balance, and recent-activity
    panel are displayed.
 
 To test the lockout separately, enter invalid credentials three times. The
@@ -175,6 +180,7 @@ transaction:
    - Full name: `Test Account`
    - Mobile number: `09191234567`
    - PIN: `2468`
+   - Confirm PIN: `2468`
 4. Confirm that the account starts at PHP 0.00.
 5. Credit the account PHP 200.00, then debit PHP 50.00.
 6. Confirm that its final balance is PHP 150.00.
@@ -185,10 +191,10 @@ transaction:
 9. Confirm that creating the same mobile number again and deducting more than
    PHP 150.00 are rejected.
 
-### 5. Logout and exit
+### 5. Logout and close
 
 1. Log out and confirm that JCash returns to the role-selection screen.
-2. Select **Exit** and confirm that the window closes cleanly.
+2. Close the application window and confirm that it exits cleanly.
 
 ## PowerShell compile and run
 

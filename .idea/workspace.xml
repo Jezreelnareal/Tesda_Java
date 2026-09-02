@@ -4,28 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0dd24741-43e3-48b8-a879-b44df0a553ca" name="Changes" comment="configured files">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/mysql_connector_j_26_7_0.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tesda_Java.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Tesda_Java.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/database/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/seed.sql" beforeDir="false" afterPath="$PROJECT_DIR$/database/seed.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/performance/results/reused-benchmark.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/performance/results/reused-benchmark.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/performance/results/reused-jfr-summary.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/performance/results/reused-jfr-summary.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/performance/results/unpooled-benchmark.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/performance/results/unpooled-benchmark.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/performance/results/unpooled-jfr-summary.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/performance/results/unpooled-jfr-summary.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/run-performance.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/run-performance.ps1" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/admin/TransactionCleanupTool.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/admin/TransactionCleanupTool.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/model/TransactionType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/TransactionType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/repository/TransactionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/repository/TransactionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/service/Auth.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/service/Auth.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/service/Logs.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/service/Logs.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/service/Transfer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/service/Transfer.java" afterDir="false" />
-    </list>
+    <list default="true" id="0dd24741-43e3-48b8-a879-b44df0a553ca" name="Changes" comment="configured files" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
