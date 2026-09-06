@@ -1,5 +1,10 @@
 # JCash Performance Tuning Report
 
+These are historical measurements of the standalone JDBC benchmark, captured
+before the Next.js UI migration. They do not measure HTTP latency, browser
+rendering, or concurrent web traffic. The reusable JDBC connection remains
+synchronized; money operations continue to use dedicated JDBC transactions.
+
 ## Environment
 
 - Application: standalone, single-threaded Java console application
@@ -9,10 +14,11 @@
 - JVM benchmark settings: `-Xms64m -Xmx64m -XX:+UseG1GC`
 - Workload: repeated read-only user lookups using the same prepared SQL query
 
-JCash does not run inside an application server or container. Consequently,
-there is no servlet-thread or container pool to tune. The equivalent runtime
-configuration for this project is its JDBC connection lifecycle and JVM launch
-configuration.
+The measured benchmark did not run inside an application server. Its runtime
+configuration covered the JDBC connection lifecycle and JVM launch settings.
+The current application uses a JDK HTTP server with eight request workers and
+a separate Next.js frontend; that request path needs its own load benchmark
+before these results can be generalized to web traffic.
 
 ## Identified Issue
 
@@ -28,8 +34,8 @@ each measured lookup.
 ## Applied Improvement
 
 `DatabaseConnection.withReusableConnection` now keeps one synchronized
-connection for short, single-operation repository calls. The application and
-cleanup entry points release it in a `finally` block. A failed or invalid
+connection for short, single-operation repository calls. The HTTP server's
+shutdown hook and cleanup entry point release it. A failed or invalid
 connection is discarded so a later operation can reconnect.
 
 Cash-in and transfer retain dedicated connections because their row locks,

@@ -33,17 +33,17 @@ CREATE TABLE transactions (
     CONSTRAINT fk_transactions_sender
         FOREIGN KEY (sender_mobile_number)
         REFERENCES users (mobile_number)
-        ON UPDATE CASCADE
+        ON UPDATE RESTRICT
         ON DELETE RESTRICT,
     CONSTRAINT fk_transactions_receiver
         FOREIGN KEY (receiver_mobile_number)
         REFERENCES users (mobile_number)
-        ON UPDATE CASCADE
+        ON UPDATE RESTRICT
         ON DELETE RESTRICT,
     CONSTRAINT fk_transactions_admin
         FOREIGN KEY (admin_username)
         REFERENCES admins (username)
-        ON UPDATE CASCADE
+        ON UPDATE RESTRICT
         ON DELETE RESTRICT,
     CONSTRAINT chk_transactions_type
         CHECK (transaction_type IN (

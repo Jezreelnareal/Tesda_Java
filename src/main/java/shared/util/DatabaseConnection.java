@@ -27,9 +27,9 @@ public final class DatabaseConnection {
 
     /**
      * Executes one short database operation with the application's reusable
-     * connection. JCash is a single-threaded console application, so one
-     * synchronized connection avoids repeated connection handshakes without
-     * introducing an external connection-pool dependency.
+     * connection. Calls are serialized on this monitor, so concurrent HTTP
+     * requests cannot use this connection at the same time. Money operations
+     * retain dedicated connections and explicit JDBC transactions.
      */
     public static synchronized <T> T withReusableConnection(
             ConnectionOperation<T> operation

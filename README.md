@@ -1,370 +1,223 @@
-# JCash Banking System
+﻿# JCash Banking System
 
-JCash is a Java banking application backed by MySQL and JDBC. It
-supports PIN-based user and administrator login, transactional balance
-updates, transaction history, administrative account management, and JDBC
-performance benchmarking.
+JCash uses a Next.js + TypeScript browser interface, a Java HTTP API, and
+MySQL through JDBC. The Swing/JFrame interface has been replaced.
 
 ## Features
 
-### User features
+- Personal and administrator login with three failed attempts per role per browser session
+- Customer registration with a zero starting balance
+- Balance display, cash-in, withdrawal, transfers, and transaction receipts
+- Searchable transaction history, including sent and received transfers
+- Admin account search/creation, credit/debit adjustments, and system reports
+- Responsive layouts, light/dark themes, and PIN visibility toggles
+- The standalone JDBC cleanup utility and existing performance benchmark
 
-- Create a new zero-balance account from the welcome screen
-- Sign in with a registered mobile number and four-digit PIN
-- View the current balance and account details
-- Cash in and withdraw funds
-- Transfer funds to another registered mobile number
-- Review cash-in, withdrawal, transfer, and admin-adjustment history
-- Receive clear validation messages and detailed transaction receipts
-- Search and filter transaction history and view recent activity
-- Switch between light and dark mode for the current session
-- Use a responsive dashboard with a compact sidebar on smaller windows
-- Log out to the role-selection screen
-
-### Administrator features
-
-- Sign in with an admin username and four-digit PIN
-- View all accounts or find one by mobile number
-- Create zero-balance user accounts
-- Credit or debit accounts with recorded admin audit transactions
-- Generate aggregate totals and view the 100 most recent transactions
-- Review live customer, combined-balance, and transaction metrics
-- Search the customer table and view the 10 most recent system activities
-- Log out to the role-selection screen
-
-Both login types allow three failed attempts per application session.
-
-## Java source structure
-
-The source packages separate customer features, administrator features, and
-shared code while retaining the model, service, repository, and UI layers:
-
-```text
-src/main/java/
-|-- Main.java
-|-- user/
-|   |-- model/          User, customer transactions, and transfer receipts
-|   |-- repository/     UserRepository
-|   `-- service/        CashIn, Withdrawal, Transfer, and Logs
-|-- admin/
-|   |-- model/          Admin, admin transactions, receipts, and reports
-|   |-- repository/     AdminRepository
-|   |-- service/        AdminAccountService
-|   |-- ui/             AdminDashboardPanel
-|   `-- TransactionCleanupTool.java
-|-- shared/
-|   |-- model/          Transaction base class and TransactionType
-|   |-- repository/     TransactionRepository for all transaction types
-|   |-- service/        Auth and Balance, used by both roles
-|   |-- util/           Database, credentials, and input helpers
-|   `-- ui/             JCashFrame, UiTheme, UiIcon, and UiDialogs
-`-- performance/        PerformanceBenchmark
-```
-
-`JCashFrame` remains shared because it coordinates role selection, both login
-forms, registration, and the customer dashboard. The administrator dashboard
-lives in `admin.ui`. Admin services use the customer model and repository when
-managing customer accounts; these classes have one implementation in `user`.
-The application, cleanup, and benchmark entry points remain `Main`,
-`admin.TransactionCleanupTool`, and `performance.PerformanceBenchmark`.
-
-## Technology
-
-- Java Swing
-- JDBC
-- MySQL
-- Docker Compose for the local MySQL service
-- Maven dependency and build management
-- FlatLaf light and dark themes
-- Java Flight Recorder for performance evidence
-- IntelliJ IDEA project configuration
-
-## Requirements
-
-- JDK 17 or newer; the current project has been verified with JDK 25
-- Docker Desktop with Docker Compose
-- Maven 3.9+ (IntelliJ IDEA's bundled Maven also works)
-- IntelliJ IDEA is recommended; Connector/J and FlatLaf are downloaded by Maven
-
-## Docker database setup
-
-> [!WARNING]
-> `database/schema.sql` runs `DROP DATABASE IF EXISTS jcash_db`. Running it
-> permanently removes the current contents of `jcash_db` before recreating and
-> seeding the assignment database.
-
-JCash runs as a normal desktop application while MySQL runs in Docker. Keep
-[`compose.yaml`](compose.yaml) and `.env` in the project root beside `pom.xml`:
+## Structure
 
 ```text
 Tesda_Java/
-|-- .env
-|-- compose.yaml
-|-- pom.xml
-|-- database/
-|   |-- schema.sql
-|   `-- seed.sql
-`-- src/
+|-- frontend/                       Next.js + TypeScript
+|   |-- src/app/
+|   |   |-- page.tsx                 Login and registration
+|   |   |-- user/page.tsx            Customer portal
+|   |   |-- admin/page.tsx           Administrator portal
+|   |   `-- api/[...path]/route.ts   Same-origin proxy to Java
+|   |-- src/components/
+|   |   |-- user/                   Customer dashboard
+|   |   |-- admin/                  Administrator dashboard
+|   |   `-- shared/                 Forms, navigation, sessions, and tables
+|   |-- src/lib/api.ts              Typed API client and response contracts
+|   `-- tests/                      Playwright browser tests
+|-- src/main/java/
+|   |-- Main.java                   Starts the Java API
+|   |-- user/                       Customer API, models, repository, services
+|   |-- admin/                      Admin API, models, repository, service, cleanup
+|   |-- shared/                     HTTP/session code, shared models, JDBC, auth
+|   `-- performance/                JDBC benchmark
+|-- src/test/java/                  Java API and session tests
+|-- database/                       MySQL schema and seed records
+|-- scripts/                        API, browser test, and benchmark runners
+|-- compose.yaml                    Local MySQL service
+`-- pom.xml                         Java dependencies and build
 ```
 
-Create `.env` with local development passwords:
+The browser calls Next.js at `/api/*`. Next.js forwards those requests to
+Java on loopback. Java retains the business rules, PIN verification,
+authorization, money calculations, and JDBC transactions. Database passwords
+stay in the Java process. Both roles use the same customer records and
+transaction repository.
+
+## Requirements
+
+- JDK 17 or newer
+- Maven, or the Maven bundled with IntelliJ IDEA
+- Node.js 20.9 or newer and npm; verified here with Node.js 24
+- Docker Desktop with Compose for MySQL
+- Microsoft Edge for the supplied Playwright configuration
+
+The frontend follows the [Next.js App Router](https://nextjs.org/docs/app/getting-started/installation)
+and uses a [route handler](https://nextjs.org/docs/app/api-reference/file-conventions/route)
+to forward API requests.
+
+## Run locally
+
+Create a root `.env` if one does not already exist:
 
 ```env
 MYSQL_ROOT_PASSWORD=replace-with-a-root-password
 JCASH_DB_PASSWORD=replace-with-an-app-password
 ```
 
-The file is ignored by Git and must not be committed. Stop MySQL in XAMPP
-before starting Docker because only one service can use host port `3306`.
+Use the existing passwords if your MySQL volume already contains data.
+Local environment files are ignored by Git.
 
-Start the database from the project root:
+Start the database from the repository root:
 
 ```powershell
 docker compose up -d
-docker compose ps
 ```
 
-The `db` service should report `healthy`. On its first start, Compose mounts
-`database/schema.sql` and `database/seed.sql` into MySQL's initialization
-directory. The resulting database contains the `users`, `admins`, and
-`transactions` tables.
-
-Useful database commands:
+In a terminal at the repository root, start the Java API:
 
 ```powershell
-# Follow MySQL startup and initialization logs
-docker compose logs -f db
-
-# Stop without deleting data
-docker compose stop
-
-# Start an existing stopped container
-docker compose start
-
-# Remove the container while preserving the database volume
-docker compose down
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/run-api.ps1
 ```
 
-Initialization scripts run only when the MySQL data volume is empty. To
-intentionally delete all Docker database data and recreate the seeded database:
+The script reads `JCASH_DB_PASSWORD` from the root `.env`, defaults to the
+Compose `jcash` database user, and finds Maven on PATH or IntelliJ's bundled
+Maven. Existing process environment settings take precedence.
+
+In a second terminal:
 
 ```powershell
-docker compose down -v
-docker compose up -d
+cd frontend
+npm run dev
 ```
 
-> [!CAUTION]
-> The `-v` option permanently deletes the current Docker database volume,
-> including registered users, balances, and transaction history.
+For the first setup, or after `package-lock.json` changes, run `npm ci` in
+`frontend/` before starting the development server. Stop any running Next.js
+server first (Ctrl+C in its terminal). Windows locks the native SWC dependency
+while Next.js is running, so reinstalling at that time can fail with `EPERM`.
+If installation fails, fix it and rerun `npm ci` successfully before using
+`npm run dev`. You do not need to reinstall dependencies on each startup.
 
-## JCash database configuration
+Open **http://localhost:3000**. Java listens on **127.0.0.1:8080**.
+For a production frontend build, use `npm run build` followed by `npm run start`
+in `frontend/`, with the Java API running separately.
 
-The Docker database uses these application settings:
+### IntelliJ or manual Java startup
 
-| Environment variable | Value |
+Run `Main.main()` or `mvn compile exec:java` with these environment variables:
+
+| Variable | Local setting |
 |---|---|
 | `JCASH_DB_URL` | `jdbc:mysql://localhost:3306/jcash_db` |
-| `JCASH_DB_USER` | `jcash` |
-| `JCASH_DB_PASSWORD` | Same value as `.env` |
+| `JCASH_DB_USER` | `jcash` for the Compose database |
+| `JCASH_DB_PASSWORD` | The app password from `.env` |
+| `JCASH_API_PORT` | `8080` by default |
 
-Docker Compose reads `.env`, but the Java application does not. Supply these
-variables separately in the IntelliJ run configuration or the terminal that
-launches JCash.
+`Main` starts an HTTP server; it no longer opens a desktop window. When
+bypassing the PowerShell runner, configure database variables yourself.
+`DatabaseConnection` retains its original `root` fallback for standalone tools.
 
-For PowerShell:
+To change the frontend's backend address, copy `frontend/.env.example` to
+`frontend/.env.local` and set `JCASH_API_URL`. This is a server-only setting.
+Restart Next.js after changing it.
 
-```powershell
-$env:JCASH_DB_URL = "jdbc:mysql://localhost:3306/jcash_db"
-$env:JCASH_DB_USER = "jcash"
-$env:JCASH_DB_PASSWORD = "replace-with-the-app-password-from-.env"
-```
+## Seeded development logins
 
-## IntelliJ setup and run
-
-1. Open the repository directory (the folder containing `pom.xml`) in IntelliJ.
-2. Select a JDK 17+ under **File > Project Structure > Project**.
-3. Open the **Maven** tool window and select **Reload All Maven Projects**. If
-   prompted, choose **Load Maven Project**. IntelliJ downloads FlatLaf and
-   Connector/J automatically.
-4. Open [`Main.java`](src/main/java/Main.java), click the green run arrow beside
-   `main`, then choose **Run 'Main.main()'**.
-5. Open **Run > Edit Configurations**, select the `Main` configuration, and add
-   the three `JCASH_DB_*` values shown above under **Environment variables**.
-   Do not include quotes or extra spaces.
-6. Run JCash and wait for the login form to show **Database connected**.
-
-You can also run the `exec:java` goal from the Maven tool window under
-**Plugins > exec**, or use a terminal:
-
-```powershell
-$env:JCASH_DB_URL = "jdbc:mysql://localhost:3306/jcash_db"
-$env:JCASH_DB_USER = "jcash"
-$env:JCASH_DB_PASSWORD = "replace-with-the-app-password-from-.env"
-
-mvn clean compile
-mvn exec:java
-```
-
-## Seeded logins
-
-| Role | Account | PIN | Starting balance |
+| Role | Identifier | PIN | Initial balance |
 |---|---|---|---:|
-| User | `09171234567` | `1234` | PHP 1,000.00 |
-| User | `09181234567` | `5678` | PHP 500.00 |
-| Admin | `admin` | `1234` | Not applicable |
+| Customer | `09171234567` | `1234` | PHP 1,000.00 |
+| Customer | `09181234567` | `5678` | PHP 500.00 |
+| Administrator | `admin` | `1234` | — |
 
-These credentials are for development and assessment only. Users still enter
-four-digit PINs, but JCash stores only salted PBKDF2-HMAC-SHA-256 hashes. When
-JCash first connects to an older database, it automatically widens the PIN
-columns and hashes legacy plaintext PINs.
+Seeds run only when a new database is initialized. An existing database may
+have different accounts and balances.
 
-## Manual acceptance test
+## Browser sessions and access
 
-Reset the Docker database immediately before this test so the expected balances
-are deterministic. This deletes the current Docker data volume:
+- Java checks the role on every protected API request and derives the acting
+  account from the session. Clients cannot choose their sender or admin identity.
+- The opaque session cookie is HttpOnly and SameSite=Strict. Next.js adds
+  Secure when accessed through HTTPS.
+- Session IDs rotate on login/logout. Idle sessions expire after 30 minutes.
+- User and admin each have three failed login attempts per browser session.
+  Reloading or signing out does not reset the counters. A new browser session
+  or idle-session expiry starts a new allowance. This is session-level
+  assignment behavior, not an account-wide lockout.
+- Mutations require a same-origin check at Next.js and a custom request header.
+  No cross-origin API access is enabled.
+- Responses omit PINs and PIN hashes. Money is sent as decimal strings and
+  calculated with Java BigDecimal.
+- Money operations retain JDBC transactions and row locks.
+- Sessions are in memory and cleared when Java restarts. Both supplied launch
+  commands bind to loopback for local use.
 
-```powershell
-docker compose down -v
-docker compose up -d
-```
+## Verification
 
-### 1. Navigation and login
-
-1. Launch JCash and confirm that **User login**, **Admin login**, and
-   **Create account** are available in that order.
-2. Select **Dark mode**, confirm that the screen remains readable, then switch
-   back to light mode. Resize the window below 1,050 pixels and confirm that
-   the signed-in sidebar changes to its compact icon layout.
-3. On either login form, confirm that the eye icon inside the PIN field reveals
-   and hides the PIN.
-4. Open the dedicated account-creation screen, confirm that mismatched PINs
-   are rejected inline, and verify that successful registration opens the user
-   login with the mobile number filled in.
-5. Enter an incorrect user PIN and confirm that the remaining-attempt count
-   decreases.
-6. Restart the application if needed, then sign in as `09171234567` / `1234`.
-7. Confirm that Juan Dela Cruz, a PHP 1,000.00 balance, and recent-activity
-   panel are displayed.
-
-To test the lockout separately, enter invalid credentials three times. The
-selected login form must remain locked until JCash is closed and reopened.
-User and admin attempt counts are independent.
-
-### 2. User money operations
-
-Perform these operations in order while signed in as Juan:
-
-| Operation | Amount | Expected Juan balance |
-|---|---:|---:|
-| Starting balance | N/A | PHP 1,000.00 |
-| Cash in | PHP 100.00 | PHP 1,100.00 |
-| Withdraw | PHP 25.00 | PHP 1,075.00 |
-| Transfer to `09181234567` | PHP 50.00 | PHP 1,025.00 |
-
-Then verify:
-
-- Maria Santos has PHP 550.00.
-- Juan's account-details dialog shows his name, mobile/account number, and PHP
-  1,025.00 balance.
-- Juan's transaction history contains one cash-in, one withdrawal, and one
-  sent transfer.
-- Maria's history contains the received transfer.
-- Each successful operation shows the amount and appropriate old/new balance.
-
-### 3. User validation
-
-Confirm that JCash rejects each case without changing balances or inserting a
-transaction:
-
-- Zero or negative amount
-- More than two decimal places
-- Withdrawal or transfer greater than the available balance
-- Transfer to the sender's own mobile number
-- Transfer to an unregistered mobile number
-- Invalid mobile-number format
-
-### 4. Administrator flow
-
-1. Log out and sign in as `admin` / `1234`.
-2. View all accounts and search for `09171234567`.
-3. Create an account with:
-   - Full name: `Test Account`
-   - Mobile number: `09191234567`
-   - PIN: `2468`
-   - Confirm PIN: `2468`
-4. Confirm that the account starts at PHP 0.00.
-5. Credit the account PHP 200.00, then debit PHP 50.00.
-6. Confirm that its final balance is PHP 150.00.
-7. Generate the system report and confirm that it shows three users and the
-   recent user/admin transactions.
-8. Confirm that the test account's history contains `ADMIN_CREDIT` and
-   `ADMIN_DEBIT` entries identifying the admin actor.
-9. Confirm that creating the same mobile number again and deducting more than
-   PHP 150.00 are rejected.
-
-### 5. Logout and close
-
-1. Log out and confirm that JCash returns to the role-selection screen.
-2. Close the application window and confirm that it exits cleanly.
-
-## PowerShell compile and run
-
-Maven resolves every dependency, so no local Connector/J path is needed:
+Java tests, without a database:
 
 ```powershell
-mvn clean compile
-mvn exec:java
+mvn test
 ```
 
-## Performance benchmark
-
-The performance runner compares a new physical JDBC connection per lookup
-with the reusable single-threaded connection used by JCash:
+Frontend checks, inside `frontend/`:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass `
-    -File .\scripts\run-performance.ps1 `
-    -Iterations 200
+npm run typecheck
+npm run build
 ```
 
-The script saves benchmark logs and Java Flight Recorder summaries under
-`docs/performance/results`. See the
-[`performance report`](docs/performance/REPORT.md) for the recorded analysis.
+End-to-end tests, from the repository root:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-web.ps1
+```
+
+The browser runner uses Compose MySQL and a uniquely named `jcash_web_test_*`
+database. It seeds test records, starts Java on port 8181 and Next.js on port
+3100, runs Playwright in Edge, and removes the test database and grant in a
+`finally` block. It does not reset `jcash_db`. Screenshots and failure traces
+are written to `frontend/test-results/`.
+
+See [docs/USAGE.md](docs/USAGE.md) for the manual demonstration flow.
+
+## Database initialization
+
+Compose runs `database/schema.sql` and `database/seed.sql` only when the volume
+is empty. **Running `schema.sql` manually drops and recreates `jcash_db`,
+deleting its data.** It is not needed for the UI migration.
+
+Foreign-key updates use `RESTRICT` for compatibility with the transaction
+participant check constraints on MySQL 8.4. The application does not change
+account identifiers.
+
+## JDBC cleanup and performance
+
+`admin.TransactionCleanupTool` remains a standalone console entry point for
+the optional JDBC delete demonstration. Removing a test transaction does not
+reverse balances.
+
+Run the JDBC benchmark with:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/run-performance.ps1
+```
+
+The [performance report](docs/performance/REPORT.md) contains previously
+captured JDBC evidence. Those measurements cover repository access, not the
+new browser/API request path.
 
 ## Troubleshooting
 
-### Database unavailable
-
-- Run `docker compose ps` and confirm that `jcash-mysql` is healthy.
-- Inspect initialization errors with `docker compose logs db`.
-- Confirm XAMPP MySQL is stopped and Docker owns port `3306`.
-- Confirm that `JCASH_DB_PASSWORD` exactly matches the value in `.env`.
-- Confirm the variables were added to the active IntelliJ `Main` run
-  configuration, then completely stop and restart JCash.
-- Remember that `.env` is read by Compose, not automatically by Java.
-- Use **Retry connection** on the login screen after fixing the database.
-
-### Maven dependencies are red in IntelliJ
-
-- Right-click `pom.xml` and choose **Add as Maven Project** if available.
-- In the Maven tool window, select **Reload All Maven Projects**.
-- Confirm IntelliJ is not in Maven offline mode and has internet access for the
-  first dependency download.
-- Use **File > Invalidate Caches** only if reloading Maven does not fix imports.
-
-### `mvn` is not recognized in PowerShell
-
-Use the Maven tool window in IntelliJ, or install Maven and add its `bin`
-directory to `PATH`. The performance script automatically looks for IntelliJ's
-bundled Maven when `mvn` is unavailable.
-
-### Login is locked
-
-Close and reopen JCash. The three-attempt limit applies to the current
-application session.
-
-## Additional documentation
-
-- [`JCash usage reference`](docs/USAGE.md)
-- [`Performance tuning report`](docs/performance/REPORT.md)
-- [`Performance benchmark`](src/main/java/performance/PerformanceBenchmark.java)
+- **Cannot reach Java:** start the API runner and check port 8080 and `JCASH_API_URL`.
+- **Database unavailable:** run `docker compose ps`, confirm MySQL is healthy,
+  and check the Java process's database settings. The API retries initialization.
+- **Login locked:** wait for idle-session expiry or start a new browser session.
+  Refreshing the page does not reset counters.
+- **Maven not found:** use the PowerShell runner or IntelliJ's Maven window.
+- **Port in use:** stop the old process or configure a different port.
+- **Connection lost during a transaction:** refresh the balance and history
+  before submitting the transaction again.
