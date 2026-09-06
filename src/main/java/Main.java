@@ -1,6 +1,6 @@
 import javax.swing.SwingUtilities;
-import ui.JCashFrame;
-import ui.UiTheme;
+import shared.ui.JCashFrame;
+import shared.ui.UiTheme;
 
 public class Main {
 

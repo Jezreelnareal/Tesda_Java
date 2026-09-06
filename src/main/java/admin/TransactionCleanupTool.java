@@ -4,16 +4,16 @@ import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
-import model.CashInTransaction;
-import model.AdminCreditTransaction;
-import model.AdminDebitTransaction;
-import model.Transaction;
-import model.TransferTransaction;
-import model.WithdrawalTransaction;
-import repository.TransactionRepository;
-import service.Balance;
-import util.DatabaseConnection;
-import util.InputValidator;
+import user.model.CashInTransaction;
+import admin.model.AdminCreditTransaction;
+import admin.model.AdminDebitTransaction;
+import shared.model.Transaction;
+import user.model.TransferTransaction;
+import user.model.WithdrawalTransaction;
+import shared.repository.TransactionRepository;
+import shared.service.Balance;
+import shared.util.DatabaseConnection;
+import shared.util.InputValidator;
 
 public final class TransactionCleanupTool {
 

@@ -1,6 +1,6 @@
 # JCash Banking System
 
-JCash is a Java Swing banking application backed by MySQL and JDBC. It
+JCash is a Java banking application backed by MySQL and JDBC. It
 supports PIN-based user and administrator login, transactional balance
 updates, transaction history, administrative account management, and JDBC
 performance benchmarking.
@@ -33,6 +33,40 @@ performance benchmarking.
 - Log out to the role-selection screen
 
 Both login types allow three failed attempts per application session.
+
+## Java source structure
+
+The source packages separate customer features, administrator features, and
+shared code while retaining the model, service, repository, and UI layers:
+
+```text
+src/main/java/
+|-- Main.java
+|-- user/
+|   |-- model/          User, customer transactions, and transfer receipts
+|   |-- repository/     UserRepository
+|   `-- service/        CashIn, Withdrawal, Transfer, and Logs
+|-- admin/
+|   |-- model/          Admin, admin transactions, receipts, and reports
+|   |-- repository/     AdminRepository
+|   |-- service/        AdminAccountService
+|   |-- ui/             AdminDashboardPanel
+|   `-- TransactionCleanupTool.java
+|-- shared/
+|   |-- model/          Transaction base class and TransactionType
+|   |-- repository/     TransactionRepository for all transaction types
+|   |-- service/        Auth and Balance, used by both roles
+|   |-- util/           Database, credentials, and input helpers
+|   `-- ui/             JCashFrame, UiTheme, UiIcon, and UiDialogs
+`-- performance/        PerformanceBenchmark
+```
+
+`JCashFrame` remains shared because it coordinates role selection, both login
+forms, registration, and the customer dashboard. The administrator dashboard
+lives in `admin.ui`. Admin services use the customer model and repository when
+managing customer accounts; these classes have one implementation in `user`.
+The application, cleanup, and benchmark entry points remain `Main`,
+`admin.TransactionCleanupTool`, and `performance.PerformanceBenchmark`.
 
 ## Technology
 

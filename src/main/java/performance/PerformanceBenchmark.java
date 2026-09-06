@@ -10,9 +10,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import model.User;
-import repository.UserRepository;
-import util.DatabaseConnection;
+import user.model.User;
+import user.repository.UserRepository;
+import shared.util.DatabaseConnection;
 
 /**
  * Read-only benchmark comparing a new physical JDBC connection per lookup
