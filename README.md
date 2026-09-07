@@ -3,6 +3,18 @@
 JCash uses a Next.js + TypeScript browser interface, a Java HTTP API, and
 MySQL through JDBC. The Swing/JFrame interface has been replaced.
 
+## Security and deployment readiness
+
+JCash currently supports a local banking simulation. The initial source review
+identified blockers for real-money deployment, including unverified customer
+cash-in, session-only login limits, and missing duplicate-request protection.
+A successful production build does not establish security readiness.
+
+See the [security readiness checklist](docs/SECURITY_READINESS.md) for the
+findings, recommended fixes, scan commands, security test scenarios, and
+deployment acceptance criteria. These recommendations are pending work;
+the review did not include vulnerability scans or penetration testing.
+
 ## Features
 
 - Personal and administrator login with three failed attempts per role per browser session
