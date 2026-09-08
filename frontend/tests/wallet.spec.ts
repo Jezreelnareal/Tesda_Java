@@ -34,8 +34,17 @@ test("customer cash-in, validation, withdrawal, transfer, history and logout", a
   await login(page, "user", "09171234567", "1234");
   await expect(page).toHaveURL("/user");
   await expect(page.locator(".balance-value")).toContainText("1,000.00");
-  await page.getByRole("button", { name: "Cash in", exact: false }).click();
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Cash in", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Cash in", exact: true }),
+  ).toBeVisible();
   await page.getByLabel("Amount (PHP)").fill("100.00");
+  await expect(page.getByRole("form", { name: "Cash in form" })).toContainText(
+    "1,100.00",
+  );
   await page.getByRole("button", { name: "Confirm cash in" }).click();
   await expect(page.locator(".balance-value")).toContainText("1,100.00");
   await page.getByRole("button", { name: "Withdraw", exact: false }).click();
@@ -46,13 +55,15 @@ test("customer cash-in, validation, withdrawal, transfer, history and logout", a
   await page.getByLabel("Recipient mobile number").fill("09999999999");
   await page.getByLabel("Amount (PHP)").fill("50");
   await page.getByRole("button", { name: "Confirm send money" }).click();
-  await expect(page.getByRole("dialog").getByRole("alert")).toBeVisible();
+  await expect(
+    page.getByRole("form", { name: "Send money form" }).getByRole("alert"),
+  ).toBeVisible();
   await page.getByLabel("Recipient mobile number").fill("09181234567");
   await page.getByLabel("Amount (PHP)").fill("9999");
   await page.getByRole("button", { name: "Confirm send money" }).click();
-  await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
-    "Insufficient",
-  );
+  await expect(
+    page.getByRole("form", { name: "Send money form" }).getByRole("alert"),
+  ).toContainText("Insufficient");
   await page.getByLabel("Amount (PHP)").fill("50");
   await page.getByRole("button", { name: "Confirm send money" }).click();
   await expect(page.locator(".balance-value")).toContainText("1,025.00");
@@ -117,6 +128,47 @@ test("admin creates accounts, adjusts balances, and reads reports", async ({
     path: "test-results/admin-reports.png",
     fullPage: true,
   });
+
+  const recent = page.locator("section").filter({
+    has: page.getByRole("heading", {
+      name: "Recent transactions",
+      exact: true,
+    }),
+  });
+  const creditLog = recent
+    .locator("tbody tr")
+    .filter({ hasText: "Admin credit" });
+  const deleteButton = creditLog.getByRole("button", {
+    name: /Delete transaction log/,
+  });
+  const id = (await deleteButton.getAttribute("aria-label"))!.match(/\d+$/)![0];
+  await deleteButton.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toContainText("does not undo the transaction");
+  await expect(
+    dialog.getByRole("button", { name: "Delete permanently" }),
+  ).toBeDisabled();
+  await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(creditLog).toHaveCount(1);
+  await deleteButton.click();
+  await dialog.getByLabel(`Type DELETE ${id} to confirm`).fill(`DELETE ${id}`);
+  await dialog.getByRole("button", { name: "Delete permanently" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole("status")).toContainText(
+    "Account balances were not changed",
+  );
+  await expect(recent).toBeVisible();
+  await expect(creditLog).toHaveCount(0);
+  await expect(
+    page.locator(".report-panel tbody tr").filter({ hasText: "Admin credit" }),
+  ).toContainText("0.00");
+  await page.reload();
+  await page.getByRole("button", { name: "Reports", exact: true }).click();
+  await expect(recent).toBeVisible();
+  await expect(creditLog).toHaveCount(0);
+  await page.getByRole("button", { name: "Accounts", exact: true }).click();
+  await page.getByLabel("Search accounts").fill("09191234567");
+  await expect(page.locator("tbody tr")).toContainText("150.00");
 });
 
 test("registration, mobile layout and theme toggle", async ({ page }) => {
@@ -137,6 +189,28 @@ test("registration, mobile layout and theme toggle", async ({ page }) => {
   await expect(page.getByRole("status")).toContainText("Account created");
   await login(page, "user", "09201234567", "2468");
   await expect(page.locator(".balance-value")).toContainText("0.00");
+  const expandNavigation = page.getByRole("button", {
+    name: "Expand navigation panel",
+  });
+  await expandNavigation.click();
+  await expect(page.getByRole("dialog", { name: "Navigation" })).toBeVisible();
+  await expect(page.locator(".workspace")).toHaveAttribute("inert", "");
+  await page.keyboard.press("Escape");
+  await expect(expandNavigation).toBeFocused();
+  await expandNavigation.click();
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Cash in", exact: true })
+    .click();
+  await expect(page.getByRole("dialog", { name: "Navigation" })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Cash in", exact: true }),
+  ).toBeVisible();
+  await expect(expandNavigation).toHaveAttribute("aria-expanded", "false");
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Overview", exact: true })
+    .click();
   await page.getByRole("button", { name: "Switch to dark mode" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   expect(

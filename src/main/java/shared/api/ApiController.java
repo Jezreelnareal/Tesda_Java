@@ -132,6 +132,34 @@ public class ApiController {
         });
     }
 
+    @PostMapping("/api/admin/transactions/delete")
+    ResponseEntity<String> deleteTransactionLog(HttpServletRequest request, HttpServletResponse response) {
+        return execute(request, response, () -> {
+            JsonObject body = body(request);
+            String id = field(body, "transactionId");
+            if (!id.matches("[1-9][0-9]{0,18}")) {
+                throw new Problem(400, "Enter a valid positive transaction ID.");
+            }
+            long transactionId;
+            try { transactionId = Long.parseLong(id); }
+            catch (NumberFormatException exception) {
+                throw new Problem(400, "Enter a valid positive transaction ID.");
+            }
+            String confirmation = field(body, "confirmation");
+            if (!("DELETE " + transactionId).equals(confirmation)) {
+                throw new Problem(400, "Type DELETE " + transactionId + " to confirm deletion.");
+            }
+            ensureDatabase();
+            if (!admins.deleteTransactionLog(transactionId, confirmation)) {
+                throw new Problem(404, "Transaction log not found. It may already have been deleted.");
+            }
+            org.slf4j.LoggerFactory.getLogger(ApiController.class).info(
+                    "Administrator {} deleted transaction log {}", session(request).identity(), transactionId);
+            return Map.of("deletedId", transactionId,
+                    "message", "Transaction log #" + transactionId + " deleted. Account balances were not changed.");
+        });
+    }
+
     @RequestMapping("/**")
     ResponseEntity<String> unknown() { return json(404, Map.of("error", "Endpoint not found.")); }
 

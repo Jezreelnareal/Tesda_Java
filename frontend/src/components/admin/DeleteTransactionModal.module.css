@@ -1,0 +1,67 @@
+.record {
+  margin: 18px 0;
+  padding: 16px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.record > div {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 12px;
+}
+.record dt {
+  color: var(--muted);
+}
+.record dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.warning {
+  padding: 15px;
+  border: 1px solid var(--danger);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  color: var(--danger);
+  font-size: 12px;
+}
+.warning p {
+  margin-top: 7px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.deleteButton {
+  background: #a52e2e;
+  color: white;
+}
+.deleteButton:hover:not(:disabled) {
+  background: #882424;
+}
+.actions button:disabled {
+  cursor: not-allowed;
+}
+@media (max-width: 640px) {
+  .record > div {
+    grid-template-columns: 1fr;
+    gap: 3px;
+    padding: 7px 0;
+    font-size: 13px;
+  }
+  .warning {
+    font-size: 13px;
+  }
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .actions button {
+    min-height: 44px;
+    width: 100%;
+  }
+}

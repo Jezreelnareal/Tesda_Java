@@ -145,7 +145,8 @@ Existing accounts and balances may differ if you have used the app before.
 ## Using the application
 
 **Customers:** Select **Personal account** and log in. Check your balance,
-then choose **Cash in**, **Withdraw**, or **Send money**. Enter the details
+then open the **Cash in**, **Send money**, or **Withdraw** tab. Each tab has its own
+form, balance preview, guidance, and recent records. Enter the details
 and confirm. Open **Activity** to view or search transaction history.
 
 **New customers:** Choose **Create an account**, enter your name, mobile number,
@@ -155,6 +156,19 @@ with the new credentials.
 **Administrators:** Select **Administrator** and log in. Use **Accounts** to
 search or create customers and apply credit/debit adjustments. Open **Reports**
 to view transaction totals and recent activity.
+
+**Issue 10 — test transaction cleanup:** In **Reports → Recent transactions**,
+find a disposable test record (you can search by record ID) and select **Delete
+log**. Review the record, type `DELETE <record ID>` exactly, then select **Delete
+permanently**. The backend requires an administrator session and matching
+confirmation before executing the JDBC delete. Missing records return a clear
+error; successful deletion refreshes the dashboard.
+
+This permanently removes the history row from customer logs and report totals.
+It **does not reverse the transaction or change wallet balances**. There is no
+automatic test-record classification, so use only disposable test data. For an
+isolated demonstration, the browser tests create their own temporary database.
+The existing `admin.TransactionCleanupTool` console utility remains available.
 
 For a simple demo with fresh data, cash in PHP 100 to Juan, withdraw PHP 25,
 then send PHP 50 to Maria. Juan should have PHP 1,025 and Maria PHP 550.

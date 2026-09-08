@@ -48,6 +48,17 @@ public final class AdminAccountService {
         return userRepository.findAll();
     }
 
+    /** Test-data cleanup only: removing a log does not reverse its balance changes. */
+    public boolean deleteTransactionLog(long transactionId, String confirmation) throws SQLException {
+        if (transactionId <= 0) {
+            throw new IllegalArgumentException("Transaction ID must be positive.");
+        }
+        if (!("DELETE " + transactionId).equals(confirmation)) {
+            throw new IllegalArgumentException("Type DELETE " + transactionId + " to confirm deletion.");
+        }
+        return transactionRepository.deleteById(transactionId);
+    }
+
     public User findAccount(String mobileNumber) throws SQLException {
         requireMobileNumber(mobileNumber);
         return userRepository.findByMobileNumber(mobileNumber);

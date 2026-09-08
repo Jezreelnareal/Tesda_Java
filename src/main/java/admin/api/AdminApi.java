@@ -12,7 +12,17 @@ import admin.service.AdminAccountService;
 import shared.api.Views;
 
 public final class AdminApi {
-    private final AdminAccountService service = new AdminAccountService();
+    private final AdminAccountService service;
+
+    public AdminApi() { this(new AdminAccountService()); }
+
+    public AdminApi(AdminAccountService service) {
+        this.service = java.util.Objects.requireNonNull(service);
+    }
+
+    public boolean deleteTransactionLog(long transactionId, String confirmation) throws SQLException {
+        return service.deleteTransactionLog(transactionId, confirmation);
+    }
 
     public Object create(String name, String mobile, String pin) throws SQLException {
         if (name.length() > 100) throw new IllegalArgumentException("Full name must be at most 100 characters.");

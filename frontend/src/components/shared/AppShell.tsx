@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowUpRight,
@@ -13,6 +19,11 @@ import {
   Users,
   Wallet,
   ChartNoAxesCombined,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Plus,
+  Send,
+  ArrowDownLeft,
 } from "lucide-react";
 import { api, errorText, type Session } from "@/lib/api";
 import { useSession } from "./SessionProvider";
@@ -29,8 +40,13 @@ export function Brand() {
 }
 export function ThemeToggle() {
   const [dark, setDark] = useState(false);
-  useEffect(() => {
-    const value = localStorage.getItem("jcash-theme") === "dark";
+  useLayoutEffect(() => {
+    let value = document.documentElement.dataset.theme === "dark";
+    try {
+      value = localStorage.getItem("jcash-theme") === "dark";
+    } catch {
+      // Keep the current theme when browser storage is unavailable.
+    }
     setDark(value);
     document.documentElement.dataset.theme = value ? "dark" : "light";
   }, []);
@@ -42,7 +58,11 @@ export function ThemeToggle() {
         const next = !dark;
         setDark(next);
         document.documentElement.dataset.theme = next ? "dark" : "light";
-        localStorage.setItem("jcash-theme", next ? "dark" : "light");
+        try {
+          localStorage.setItem("jcash-theme", next ? "dark" : "light");
+        } catch {
+          // The toggle still works when the preference cannot be saved.
+        }
       }}
     >
       {dark ? <Sun size={19} /> : <Moon size={19} />}
@@ -66,6 +86,51 @@ export function AppShell({
   const { session, loading, setSession } = useSession();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobile, setMobile] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const drawerOpen = mobile && !sidebarCollapsed;
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 850px)");
+    const update = () => {
+      setMobile(media.matches);
+      if (media.matches) setSidebarCollapsed(true);
+    };
+    update();
+    try {
+      setSidebarCollapsed(
+        media.matches ||
+          localStorage.getItem("jcash-sidebar-hidden") === "true",
+      );
+    } catch {
+      // Navigation still works when browser storage is unavailable.
+    }
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    toggleRef.current?.focus();
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [drawerOpen]);
+  function closeDrawer() {
+    setSidebarCollapsed(true);
+    toggleRef.current?.focus();
+  }
+  function toggleSidebar() {
+    const next = !sidebarCollapsed;
+    setSidebarCollapsed(next);
+    try {
+      localStorage.setItem("jcash-sidebar-hidden", String(next));
+    } catch {
+      // Keep the preference for this page even if it cannot be saved.
+    }
+  }
   useEffect(() => {
     if (!loading && session.role !== role)
       router.replace(session.role === "guest" ? "/" : `/${session.role}`);
@@ -74,6 +139,9 @@ export function AppShell({
     role === "user"
       ? [
           { id: "overview", label: "Overview", icon: LayoutDashboard },
+          { id: "cash-in", label: "Cash in", icon: Plus },
+          { id: "transfer", label: "Send money", icon: Send },
+          { id: "withdraw", label: "Withdraw", icon: ArrowDownLeft },
           { id: "activity", label: "Activity", icon: List },
         ]
       : [
@@ -93,8 +161,70 @@ export function AppShell({
     }
   }
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
+    <div className={`app-shell${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
+      {drawerOpen && (
+        <button
+          className="sidebar-backdrop"
+          tabIndex={-1}
+          aria-label="Close navigation"
+          onClick={closeDrawer}
+        />
+      )}
+      <aside
+        ref={sidebarRef}
+        className="sidebar"
+        id="navigation-panel"
+        role={drawerOpen ? "dialog" : undefined}
+        aria-modal={drawerOpen ? true : undefined}
+        aria-label={drawerOpen ? "Navigation" : undefined}
+        onKeyDown={(event) => {
+          if (!drawerOpen) return;
+          if (event.key === "Escape") {
+            event.preventDefault();
+            closeDrawer();
+          }
+          if (event.key === "Tab") {
+            const buttons =
+              sidebarRef.current?.querySelectorAll<HTMLButtonElement>(
+                "button:not(:disabled)",
+              );
+            if (!buttons?.length) return;
+            const first = buttons[0],
+              last = buttons[buttons.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first.focus();
+            }
+          }
+        }}
+      >
+        <button
+          ref={toggleRef}
+          type="button"
+          className="icon-button navigation-toggle sidebar-panel-toggle"
+          aria-label={
+            sidebarCollapsed
+              ? "Expand navigation panel"
+              : "Collapse navigation panel"
+          }
+          title={
+            sidebarCollapsed
+              ? "Expand navigation panel"
+              : "Collapse navigation panel"
+          }
+          aria-controls="navigation-panel"
+          aria-expanded={!sidebarCollapsed}
+          onClick={toggleSidebar}
+        >
+          {sidebarCollapsed ? (
+            <PanelLeftOpen size={19} />
+          ) : (
+            <PanelLeftClose size={19} />
+          )}
+        </button>
         <Brand />
         <div className="workspace-label">
           {role === "admin" ? "ADMIN WORKSPACE" : "YOUR WALLET"}
@@ -105,8 +235,12 @@ export function AppShell({
               key={item.id}
               className={`nav-item ${tab === item.id ? "active" : ""}`}
               aria-label={item.label}
+              title={item.label}
               aria-current={tab === item.id ? "page" : undefined}
-              onClick={() => onTab(item.id)}
+              onClick={() => {
+                onTab(item.id);
+                if (mobile) closeDrawer();
+              }}
             >
               <item.icon size={19} />
               <span>{item.label}</span>
@@ -128,6 +262,7 @@ export function AppShell({
           <button
             className="nav-item logout"
             aria-label="Sign out"
+            title="Sign out"
             onClick={() => void logout()}
             disabled={busy}
           >
@@ -136,13 +271,15 @@ export function AppShell({
           </button>
         </div>
       </aside>
-      <div className="workspace">
+      <div className="workspace" inert={drawerOpen}>
         <header className="topbar">
-          <span className="breadcrumb">
-            {role === "admin" ? "Administration" : "Personal account"}
-            <span>/</span>
-            <strong>{tabs.find((t) => t.id === tab)?.label}</strong>
-          </span>
+          <div className="topbar-start">
+            <span className="breadcrumb">
+              {role === "admin" ? "Administration" : "Personal account"}
+              <span>/</span>
+              <strong>{tabs.find((t) => t.id === tab)?.label}</strong>
+            </span>
+          </div>
           <div className="topbar-right">
             <ThemeToggle />
             <span className="topbar-divider" />

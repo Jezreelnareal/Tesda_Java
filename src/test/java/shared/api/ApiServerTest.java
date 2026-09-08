@@ -2,6 +2,9 @@ package shared.api;
 
 import admin.model.Admin;
 import admin.repository.AdminRepository;
+import admin.api.AdminApi;
+import admin.service.AdminAccountService;
+import shared.repository.TransactionRepository;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -14,6 +17,7 @@ import shared.util.PinHasher;
 import user.model.User;
 import user.repository.UserRepository;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class ApiServerTest {
     private org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext server;
@@ -46,6 +50,14 @@ class ApiServerTest {
         @org.springframework.context.annotation.Bean
         @org.springframework.context.annotation.Primary
         DatabaseCheck testDatabaseCheck() { return () -> { }; }
+
+        @org.springframework.context.annotation.Bean
+        @org.springframework.context.annotation.Primary
+        AdminApi testAdminApi() throws Exception {
+            TransactionRepository transactions = mock(TransactionRepository.class);
+            when(transactions.deleteById(105L)).thenReturn(true, false);
+            return new AdminApi(new AdminAccountService(mock(UserRepository.class), transactions));
+        }
     }
 
     private HttpResponse<String> request(String path, String body, boolean verified) throws Exception {
@@ -120,5 +132,33 @@ class ApiServerTest {
         for (String amount : new String[]{"0", "-1", "1.001", "NaN", "1e3"}) {
             assertEquals(400, request("user/transfer", "{\"amount\":\"" + amount + "\",\"receiver\":\"09181234567\"}", true).statusCode());
         }
+    }
+
+    @Test void transactionCleanupRequiresAdminAndRequestVerification() throws Exception {
+        String body = "{\"transactionId\":\"105\",\"confirmation\":\"DELETE 105\"}";
+        assertEquals(401, request("admin/transactions/delete", body, true).statusCode());
+        login("user", "09171234567", "1234");
+        assertEquals(403, request("admin/transactions/delete", body, true).statusCode());
+        request("logout", "{}", true);
+        login("admin", "admin", "1234");
+        assertEquals(403, request("admin/transactions/delete", body, false).statusCode());
+        assertEquals(200, request("admin/transactions/delete", body, true).statusCode());
+    }
+
+    @Test void cleanupValidatesConfirmationAndHandlesAlreadyDeletedRecords() throws Exception {
+        login("admin", "admin", "1234");
+        for (String id : new String[]{"0", "-1", "1.5", "1e2", "105 OR 1=1", "9223372036854775808"}) {
+            assertEquals(400, request("admin/transactions/delete",
+                    "{\"transactionId\":\"" + id + "\",\"confirmation\":\"DELETE " + id + "\"}", true).statusCode());
+        }
+        assertEquals(400, request("admin/transactions/delete", "{}", true).statusCode());
+        assertEquals(400, request("admin/transactions/delete",
+                "{\"transactionId\":\"105\",\"confirmation\":\"DELETE 106\"}", true).statusCode());
+        String body = "{\"transactionId\":\"105\",\"confirmation\":\"DELETE 105\"}";
+        var deleted = request("admin/transactions/delete", body, true);
+        assertEquals(200, deleted.statusCode());
+        assertTrue(deleted.body().contains("\"deletedId\":105"));
+        assertTrue(deleted.body().contains("Account balances were not changed"));
+        assertEquals(404, request("admin/transactions/delete", body, true).statusCode());
     }
 }

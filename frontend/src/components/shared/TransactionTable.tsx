@@ -7,6 +7,7 @@ import {
   Search,
   ArrowLeftRight,
   ReceiptText,
+  Trash2,
 } from "lucide-react";
 import { dateLabel, money, typeLabel, type Transaction } from "@/lib/api";
 
@@ -14,17 +15,19 @@ export function TransactionTable({
   transactions,
   compact = false,
   admin = false,
+  onDelete,
 }: {
   transactions: Transaction[];
   compact?: boolean;
   admin?: boolean;
+  onDelete?: (transaction: Transaction) => void;
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("ALL");
   const filtered = transactions.filter(
     (t) =>
       (filter === "ALL" || t.type === filter) &&
-      `${t.details} ${t.sender ?? ""} ${t.receiver ?? ""} ${typeLabel(t.type)}`
+      `${admin ? t.id : ""} ${t.details} ${t.sender ?? ""} ${t.receiver ?? ""} ${typeLabel(t.type)}`
         .toLowerCase()
         .includes(query.toLowerCase()),
   );
@@ -78,7 +81,11 @@ export function TransactionTable({
         </div>
       ) : (
         <div className="table-scroll">
-          <table>
+          <table
+            className="responsive-table"
+            role="table"
+            aria-label="Transactions"
+          >
             <thead>
               <tr>
                 <th>Transaction</th>
@@ -86,12 +93,13 @@ export function TransactionTable({
                 {admin && <th>Account</th>}
                 <th>Status</th>
                 <th className="align-right">Amount</th>
+                {admin && onDelete && <th className="align-right">Cleanup</th>}
               </tr>
             </thead>
             <tbody>
               {visible.map((t) => (
                 <tr key={t.id}>
-                  <td>
+                  <td className="mobile-row-heading">
                     <div className="transaction-cell">
                       <span className={`transaction-icon ${t.direction}`}>
                         {t.direction === "in" ? (
@@ -105,15 +113,25 @@ export function TransactionTable({
                       <div>
                         <strong>{typeLabel(t.type)}</strong>
                         <small>{t.details}</small>
+                        {admin && <small>Record #{t.id}</small>}
                       </div>
                     </div>
                   </td>
-                  <td className="date-cell">{dateLabel(t.dateTime)}</td>
-                  {admin && <td className="mono">{t.sender ?? t.receiver}</td>}
-                  <td>
+                  <td className="date-cell" data-label="Date & time">
+                    {dateLabel(t.dateTime)}
+                  </td>
+                  {admin && (
+                    <td className="mono" data-label="Account">
+                      {t.sender ?? t.receiver}
+                    </td>
+                  )}
+                  <td data-label="Status">
                     <span className="status-badge">Completed</span>
                   </td>
-                  <td className={`align-right amount ${t.direction}`}>
+                  <td
+                    data-label="Amount"
+                    className={`align-right amount ${t.direction}`}
+                  >
                     {t.direction === "in"
                       ? "+"
                       : t.direction === "out"
@@ -121,6 +139,20 @@ export function TransactionTable({
                         : ""}
                     {money(t.amount)}
                   </td>
+                  {admin && onDelete && (
+                    <td
+                      className="align-right mobile-row-actions"
+                      data-label="Cleanup"
+                    >
+                      <button
+                        className="button small secondary delete-log-button"
+                        aria-label={`Delete transaction log ${t.id}`}
+                        onClick={() => onDelete(t)}
+                      >
+                        <Trash2 size={14} /> Delete log
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

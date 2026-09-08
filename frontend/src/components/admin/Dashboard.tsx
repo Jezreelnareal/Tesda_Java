@@ -9,24 +9,21 @@ import {
 } from "react";
 import {
   ArrowRight,
-  ArrowUpRight,
   ArrowDownLeft,
-  ChartNoAxesCombined,
   Plus,
   RefreshCw,
   Search,
   Users,
-  Wallet,
 } from "lucide-react";
 import {
   api,
   ApiError,
   errorText,
   money,
-  typeLabel,
   type AdminDashboard,
   type Receipt,
   type User,
+  type Transaction,
 } from "@/lib/api";
 import { useSession } from "@/components/shared/SessionProvider";
 import { AppShell } from "@/components/shared/AppShell";
@@ -37,6 +34,9 @@ import {
   Modal,
 } from "@/components/shared/Forms";
 import { TransactionTable } from "@/components/shared/TransactionTable";
+import { OverviewSummary, ReportsSummary } from "./Insights";
+import styles from "./Insights.module.css";
+import { DeleteTransactionModal } from "./DeleteTransactionModal";
 
 export default function Dashboard() {
   const { session, refresh } = useSession();
@@ -53,6 +53,7 @@ export default function Dashboard() {
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
   const [success, setSuccess] = useState("");
+  const [deleting, setDeleting] = useState<Transaction | null>(null);
   const load = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -111,30 +112,42 @@ export default function Dashboard() {
         .toLowerCase()
         .includes(query.toLowerCase()),
     ) ?? [];
-  const totalCount = data
-    ? Object.values(data.totals).reduce((sum, total) => sum + total.count, 0)
-    : 0;
   return (
     <AppShell role="admin" tab={tab} onTab={setTab} name={session.identity}>
-      <div className="page-heading">
+      <div
+        className={`page-heading ${tab !== "accounts" ? styles.heading : ""}`}
+      >
         <div>
-          <span className="eyebrow">A CLEAR VIEW OF THE BIG PICTURE</span>
+          <span className="eyebrow">
+            {tab === "reports"
+              ? "JCASH / REPORTS"
+              : tab === "overview"
+                ? "JCASH / OVERVIEW"
+                : "A CLEAR VIEW OF THE BIG PICTURE"}
+          </span>
           <h1>
             {tab === "accounts"
               ? "Customer accounts"
               : tab === "reports"
-                ? "System reports"
+                ? "Transaction reports"
                 : "Welcome back, admin."}
           </h1>
           <p>
             {tab === "accounts"
               ? "A helping hand for every account."
               : tab === "reports"
-                ? "Understand the activity across JCash."
-                : "Here’s what’s happening across JCash today."}
+                ? "Explore lifetime activity and review the latest money movements."
+                : "Keep track of customer wallets, money movement, and recent activity."}
           </p>
         </div>
-        <div className="heading-actions">
+        <div
+          className={
+            tab === "accounts" ? "heading-actions" : styles.headingActions
+          }
+        >
+          {tab === "reports" && (
+            <span className={styles.scope}>All time · PHP</span>
+          )}
           <button
             className="button secondary"
             onClick={() => void load()}
@@ -143,10 +156,12 @@ export default function Dashboard() {
             <RefreshCw size={16} className={refreshing ? "spin" : ""} />
             Refresh
           </button>
-          <button className="button primary" onClick={() => open("create")}>
-            <Plus size={17} />
-            New account
-          </button>
+          {tab !== "reports" && (
+            <button className="button primary" onClick={() => open("create")}>
+              <Plus size={17} />
+              New account
+            </button>
+          )}
         </div>
       </div>
       {error && (
@@ -170,34 +185,6 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          {tab !== "accounts" && (
-            <div className="metric-grid">
-              <section className="metric-card">
-                <span className="metric-icon">
-                  <Users size={21} />
-                </span>
-                <span>Total customers</span>
-                <strong>{data.userCount}</strong>
-                <small>Registered JCash accounts</small>
-              </section>
-              <section className="metric-card featured">
-                <span className="metric-icon">
-                  <Wallet size={21} />
-                </span>
-                <span>Combined wallet balance</span>
-                <strong>{money(data.combinedBalance)}</strong>
-                <small>Across all customer accounts</small>
-              </section>
-              <section className="metric-card">
-                <span className="metric-icon">
-                  <ChartNoAxesCombined size={21} />
-                </span>
-                <span>Total transactions</span>
-                <strong>{totalCount}</strong>
-                <small>All completed money movements</small>
-              </section>
-            </div>
-          )}
           {tab === "accounts" && (
             <section className="panel">
               <div className="panel-heading">
@@ -222,7 +209,11 @@ export default function Dashboard() {
               </div>
               {users.length ? (
                 <div className="table-scroll">
-                  <table>
+                  <table
+                    className="responsive-table"
+                    role="table"
+                    aria-label="Customer accounts"
+                  >
                     <thead>
                       <tr>
                         <th>Customer</th>
@@ -234,15 +225,19 @@ export default function Dashboard() {
                     <tbody>
                       {users.map((user) => (
                         <tr key={user.mobileNumber}>
-                          <td>
+                          <td className="mobile-row-heading">
                             <div className="transaction-cell">
                               <span className="avatar">{user.fullName[0]}</span>
                               <strong>{user.fullName}</strong>
                             </div>
                           </td>
-                          <td className="mono">{user.mobileNumber}</td>
-                          <td className="amount">{money(user.balance)}</td>
-                          <td>
+                          <td className="mono" data-label="Mobile number">
+                            {user.mobileNumber}
+                          </td>
+                          <td className="amount" data-label="Balance">
+                            {money(user.balance)}
+                          </td>
+                          <td className="mobile-row-actions">
                             <div className="row-actions">
                               <button
                                 className="button small secondary"
@@ -278,68 +273,13 @@ export default function Dashboard() {
             </section>
           )}
           {tab === "overview" && (
-            <div className="insight-strip">
-              <span className="insight-icon">
-                <Users size={22} />
-              </span>
-              <div>
-                <strong>Good service starts with a clear view.</strong>
-                <p>
-                  Look up customers, create accounts, and manage balance
-                  adjustments.
-                </p>
-              </div>
-              <button
-                className="text-button"
-                onClick={() => setTab("accounts")}
-              >
-                Manage accounts <ArrowUpRight size={17} />
-              </button>
-            </div>
+            <OverviewSummary
+              data={data}
+              onAccounts={() => setTab("accounts")}
+              onReports={() => setTab("reports")}
+            />
           )}
-          {tab === "reports" && (
-            <section className="panel report-panel">
-              <div className="panel-heading">
-                <div>
-                  <h2>Transactions by type</h2>
-                  <p>
-                    Lifetime totals across all accounts. Transfer amounts are
-                    counted once.
-                  </p>
-                </div>
-              </div>
-              <div className="table-scroll">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Transaction type</th>
-                      <th>Count</th>
-                      <th className="align-right">Total amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      "CASH_IN",
-                      "WITHDRAWAL",
-                      "TRANSFER",
-                      "ADMIN_CREDIT",
-                      "ADMIN_DEBIT",
-                    ].map((type) => (
-                      <tr key={type}>
-                        <td>
-                          <strong>{typeLabel(type)}</strong>
-                        </td>
-                        <td>{data.totals[type]?.count ?? 0}</td>
-                        <td className="align-right amount">
-                          {money(data.totals[type]?.amount ?? "0")}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          )}
+          {tab === "reports" && <ReportsSummary data={data} />}
           {tab !== "accounts" && (
             <section className="panel">
               <div className="panel-heading">
@@ -349,7 +289,11 @@ export default function Dashboard() {
                       ? "Latest activity"
                       : "Recent transactions"}
                   </h2>
-                  <p>The latest transactions across the JCash community.</p>
+                  <p>
+                    {tab === "overview"
+                      ? "The five most recent completed transactions across all accounts."
+                      : "Search the latest 100 records by ID, account, or type. Delete log is for disposable test data only."}
+                  </p>
                 </div>
                 {tab === "overview" && (
                   <button
@@ -361,9 +305,11 @@ export default function Dashboard() {
                 )}
               </div>
               <TransactionTable
+                key={tab}
                 transactions={data.transactions}
                 compact={tab === "overview"}
                 admin
+                onDelete={tab === "reports" ? setDeleting : undefined}
               />
             </section>
           )}
@@ -420,6 +366,19 @@ export default function Dashboard() {
             </fieldset>
           </form>
         </Modal>
+      )}
+      {deleting && (
+        <DeleteTransactionModal
+          transaction={deleting}
+          onClose={() => setDeleting(null)}
+          onDeleted={async (message) => {
+            setDeleting(null);
+            setSuccess(message);
+            // Drop stale totals too, so a failed refresh cannot show the deleted log.
+            setData(null);
+            await load();
+          }}
+        />
       )}
     </AppShell>
   );

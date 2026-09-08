@@ -176,6 +176,11 @@ fieldset {
 .button.secondary:hover {
   background: var(--teal-soft);
 }
+.button.delete-log-button:hover {
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+  border-color: var(--danger);
+  color: var(--danger);
+}
 .button.full-width {
   width: 100%;
   padding: 14px 18px;
@@ -520,6 +525,8 @@ fieldset {
   border-top: 1px solid var(--border);
 }
 .app-shell {
+  --navigation-width: 220px;
+  --collapsed-navigation-width: 76px;
   min-height: 100vh;
   display: flex;
 }
@@ -536,7 +543,16 @@ fieldset {
 }
 .sidebar > .brand {
   margin-left: 9px;
+  margin-top: 20px;
   font-size: 28px;
+}
+.sidebar-panel-toggle {
+  position: fixed;
+  top: 8px;
+  left: calc(var(--navigation-width) - 40px);
+  z-index: 11;
+  width: 32px;
+  height: 32px;
 }
 .workspace-label {
   margin: 49px 12px 15px;
@@ -644,6 +660,54 @@ fieldset {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+.topbar-start {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.navigation-toggle {
+  flex-shrink: 0;
+  border: 0;
+  color: var(--text);
+}
+.app-shell.sidebar-collapsed {
+  --navigation-width: var(--collapsed-navigation-width);
+}
+.sidebar-collapsed .sidebar-panel-toggle {
+  top: 27px;
+  left: calc((var(--navigation-width) - 32px) / 2);
+}
+.sidebar-collapsed > .sidebar {
+  width: var(--navigation-width);
+  padding: 25px 10px 20px;
+}
+.sidebar-collapsed .sidebar > .brand {
+  visibility: hidden;
+  font-size: 0;
+  margin: 20px 0 0;
+  justify-content: center;
+}
+.sidebar-collapsed .sidebar .brand-mark {
+  margin: 0;
+}
+.sidebar-collapsed .sidebar .brand-dot,
+.sidebar-collapsed .workspace-label,
+.sidebar-collapsed .sidebar-note,
+.sidebar-collapsed .nav-item > span {
+  display: none;
+}
+.sidebar-collapsed .sidebar nav {
+  margin-top: 40px;
+}
+.sidebar-collapsed .sidebar .nav-item {
+  justify-content: center;
+  padding: 15px 10px;
+}
+.app-shell.sidebar-collapsed > .workspace {
+  margin-left: var(--navigation-width);
+  width: calc(100% - var(--navigation-width));
 }
 .topbar-divider {
   height: 24px;
@@ -801,6 +865,21 @@ fieldset {
   border: 1px solid var(--border);
   border-radius: 15px;
   padding: 23px 23px 15px;
+}
+.wallet-shortcut {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 14px;
+}
+.wallet-shortcut h2 {
+  margin: 0;
+}
+.wallet-shortcut p {
+  color: var(--muted);
+  font-size: 12px;
+  max-width: 360px;
 }
 .section-kicker {
   color: var(--muted);
@@ -1260,6 +1339,9 @@ select {
   }
 }
 @media (max-width: 1100px) {
+  .app-shell {
+    --navigation-width: 190px;
+  }
   .sidebar {
     width: 190px;
     padding: 29px 15px 15px;
@@ -1306,6 +1388,9 @@ select {
   }
 }
 @media (max-width: 850px) {
+  .app-shell {
+    --navigation-width: 76px;
+  }
   .welcome-main {
     gap: 30px;
     grid-template-columns: 1fr 1fr;
@@ -1333,7 +1418,7 @@ select {
   }
   .sidebar > .brand {
     font-size: 0;
-    margin: 0;
+    margin: 20px 0 0;
   }
   .sidebar .brand-dot,
   .sidebar .workspace-label,
@@ -1400,234 +1485,557 @@ select {
     font-size: 8px;
   }
 }
-@media (max-width: 640px) {
-  .welcome {
-    padding: 25px 20px 20px;
+/* Mobile layouts keep controls readable and every action reachable. */
+@media (max-width: 850px) {
+  .app-shell {
+    --navigation-width: 220px;
   }
-  .welcome-main {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    padding: 38px 0;
-    min-height: auto;
+  .app-shell > .workspace {
+    margin-left: var(--collapsed-navigation-width);
+    width: calc(100% - var(--collapsed-navigation-width));
   }
-  .welcome-story {
-    width: 100%;
-    text-align: center;
+  .sidebar,
+  .sidebar-collapsed > .sidebar {
+    height: 100dvh;
+    padding: 78px 10px max(12px, env(safe-area-inset-bottom));
   }
-  .welcome-story h1 {
-    font-size: 37px;
-    margin: 15px 0;
+  .app-shell:not(.sidebar-collapsed) > .sidebar {
+    width: 220px;
+    box-shadow: 16px 0 40px #0002;
   }
-  .welcome-description {
-    font-size: 12px;
-  }
-  .wallet-art,
-  .welcome-benefits {
-    display: none;
-  }
-  .auth-card {
-    text-align: left;
-    max-width: 420px;
-    padding: 26px;
-  }
-  .welcome-meta > span {
-    display: none;
-  }
-  .welcome-footer {
-    font-size: 8px;
-  }
-  .brand {
+  .app-shell:not(.sidebar-collapsed) .sidebar > .brand {
     font-size: 25px;
+    margin: 0 10px 20px;
   }
-  .brand-mark {
-    height: 34px;
-    width: 34px;
-    border-radius: 9px;
+  .app-shell:not(.sidebar-collapsed) .sidebar .brand-dot {
+    display: inline;
   }
-  .sidebar {
-    width: 61px;
-    padding: 25px 10px;
+  .app-shell:not(.sidebar-collapsed) .sidebar .brand-mark {
+    margin-right: 10px;
   }
-  .sidebar .brand-mark {
-    width: 35px;
+  .app-shell:not(.sidebar-collapsed) .workspace-label {
+    display: block;
+    margin: 8px 12px 14px;
+    font-size: 10px;
   }
-  .sidebar .nav-item {
-    padding: 14px 8px;
+  .app-shell:not(.sidebar-collapsed) .sidebar .nav-item {
+    justify-content: flex-start;
+    padding: 12px 14px;
   }
-  .workspace {
-    margin-left: 61px;
-    width: calc(100% - 61px);
+  .app-shell:not(.sidebar-collapsed) .sidebar .nav-item > span {
+    display: inline;
+  }
+  .sidebar-collapsed .sidebar > .brand {
+    display: none;
+  }
+  .sidebar nav,
+  .sidebar-collapsed .sidebar nav {
+    margin-top: 0;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .sidebar-bottom {
+    flex-shrink: 0;
+    padding-top: 8px;
+  }
+  .sidebar .sidebar-note {
+    display: none;
+  }
+  .sidebar .nav-item,
+  .sidebar-collapsed .sidebar .nav-item {
+    min-height: 44px;
+    font-size: 14px;
+    padding: 12px 10px;
+    margin-bottom: 6px;
+  }
+  .sidebar-panel-toggle {
+    width: 44px;
+    height: 44px;
+    top: 13px;
+    left: calc(var(--navigation-width) - 54px);
+  }
+  .sidebar-collapsed .sidebar-panel-toggle {
+    top: 13px;
+    left: calc((var(--navigation-width) - 44px) / 2);
+  }
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    border: 0;
+    border-radius: 0;
+    background: #0c282866;
+    z-index: 9;
+    cursor: default;
+  }
+  .sidebar-backdrop:active {
+    transform: none;
   }
   .topbar {
     height: 70px;
-    padding: 0 15px;
+    flex-shrink: 0;
+    padding: 0 16px;
+    gap: 10px;
   }
   .topbar-profile,
   .topbar-divider {
     display: none;
   }
   .topbar-right {
-    gap: 9px;
+    gap: 8px;
   }
   .breadcrumb {
-    font-size: 9px;
-    gap: 6px;
-  }
-  .breadcrumb > strong {
-    display: none;
-  }
-  .main-content {
-    padding: 23px 15px 35px;
-  }
-  .page-heading {
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 23px;
-  }
-  .page-heading h1 {
-    font-size: 25px;
-    letter-spacing: -1px;
-  }
-  .page-heading p {
-    font-size: 10px;
-  }
-  .page-heading .eyebrow {
-    font-size: 6px;
-    letter-spacing: 1px;
-  }
-  .page-heading > .button {
-    font-size: 0;
-    gap: 0;
-    padding: 10px;
-  }
-  .heading-actions .button {
-    font-size: 9px;
-    gap: 5px;
-    padding: 9px;
-  }
-  .heading-actions .button.secondary {
-    font-size: 0;
-    gap: 0;
-    align-self: flex-end;
-  }
-  .balance-card {
-    padding: 21px;
-    min-height: 235px;
-    border-radius: 12px;
-  }
-  .balance-value {
-    font-size: 32px;
-  }
-  .balance-bottom {
-    gap: 10px;
-  }
-  .balance-bottom strong {
-    font-size: 9px;
-  }
-  .balance-bottom > svg {
-    display: none;
-  }
-  .balance-label {
-    margin-top: 23px;
-  }
-  .quick-card {
-    padding: 18px;
-  }
-  .quick-card h2 {
-    font-size: 17px;
-  }
-  .quick-actions strong {
-    font-size: 9px;
-  }
-  .quick-actions small {
-    display: none;
-  }
-  .insight-strip {
-    padding: 15px;
-    gap: 10px;
+    font-size: 12px;
+    gap: 8px;
     flex-wrap: wrap;
   }
-  .insight-strip > .text-button {
-    margin-left: 45px;
-    font-size: 9px;
+  .breadcrumb > strong {
+    display: inline;
   }
-  .insight-strip > div {
-    flex: 1;
+  .icon-button {
+    min-width: 44px;
+    min-height: 44px;
   }
-  .insight-strip strong {
-    font-size: 10px;
+  .button,
+  .button.small,
+  .text-button,
+  .role-tabs button {
+    min-height: 44px;
   }
-  .insight-strip p {
-    font-size: 9px;
+  .button,
+  .button.small {
+    font-size: 13px;
+    padding: 11px 14px;
   }
-  .panel-heading {
-    padding: 18px 16px;
+  .text-button {
+    font-size: 13px;
   }
-  .panel-heading h2 {
+  .field input,
+  .search-field input,
+  select {
     font-size: 16px;
   }
-  .panel-heading p {
-    font-size: 9px;
+  .field input,
+  select,
+  .search-field {
+    min-height: 46px;
   }
+  .field > span {
+    font-size: 13px;
+  }
+  .password-field button {
+    top: 2px;
+    right: 3px;
+  }
+  .field input {
+    padding: 12px;
+  }
+  .password-field input {
+    padding-right: 52px;
+  }
+  .input-hint,
+  .modal-description {
+    font-size: 12px;
+  }
+  .page-heading {
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .page-heading > div {
+    min-width: 0;
+  }
+  .page-heading h1 {
+    font-size: 28px;
+    overflow-wrap: anywhere;
+  }
+  .page-heading p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .page-heading .eyebrow {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .heading-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .panel-heading {
+    flex-wrap: wrap;
+    padding: 20px;
+    gap: 10px;
+  }
+  .panel-heading h2 {
+    font-size: 19px;
+  }
+  .panel-heading p,
   .panel-heading .text-button {
-    font-size: 9px;
-    white-space: nowrap;
+    font-size: 12px;
   }
-  th,
-  td {
-    padding: 13px 16px;
+  .panel,
+  .wallet-grid > *,
+  .quick-card {
+    min-width: 0;
   }
   .table-toolbar {
-    padding: 0 16px 16px;
     flex-direction: column;
+    padding: 0 20px 20px;
   }
   .search-field {
     width: 100%;
   }
   .table-toolbar select {
-    align-self: flex-start;
+    width: 100%;
+    max-width: 100%;
   }
+  .table-footer {
+    font-size: 12px;
+    padding: 16px 20px;
+  }
+  .responsive-table {
+    display: block;
+    white-space: normal;
+  }
+  .responsive-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .responsive-table tbody,
+  .responsive-table tfoot {
+    display: grid;
+    padding: 0 16px 16px;
+    gap: 12px;
+  }
+  .responsive-table tr {
+    display: block;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    background: var(--surface);
+  }
+  .responsive-table td,
+  .responsive-table tfoot th {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 14px;
+    padding: 8px 0;
+    border: 0;
+    font-size: 13px;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+  .responsive-table td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 400;
+    text-align: left;
+  }
+  .responsive-table td:not([data-label])::before {
+    display: none;
+  }
+  .responsive-table .mobile-row-heading {
+    display: block;
+    text-align: left;
+    padding: 0 0 12px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .responsive-table .transaction-cell {
+    align-items: flex-start;
+    min-width: 0;
+  }
+  .responsive-table .transaction-cell > div {
+    min-width: 0;
+  }
+  .responsive-table .transaction-cell strong {
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+  .responsive-table .transaction-cell small {
+    font-size: 12px;
+    max-width: none;
+    overflow: visible;
+    white-space: normal;
+  }
+  .transaction-icon {
+    flex-shrink: 0;
+  }
+  .responsive-table .status-badge {
+    font-size: 11px;
+  }
+  .responsive-table .amount {
+    font-size: 14px;
+  }
+  .responsive-table .mobile-row-actions {
+    justify-content: flex-end;
+    align-items: center;
+    padding-bottom: 0;
+  }
+  .mobile-row-actions .row-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .mobile-row-actions .row-actions > button {
+    flex: 1;
+  }
+  .responsive-table tfoot tr {
+    background: var(--surface-soft);
+  }
+  .empty-state h3 {
+    font-size: 17px;
+  }
+  .empty-state p {
+    font-size: 13px;
+  }
+  .notice {
+    flex-wrap: wrap;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+  .notice > div {
+    min-width: 0;
+    flex: 1;
+  }
+  .notice .text-button {
+    margin-left: 0;
+  }
+  .receipt-notice p {
+    font-size: 12px;
+  }
+  .modal {
+    width: 460px;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 22px;
+  }
+  .modal-heading {
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .modal-heading h2 {
+    font-size: 22px;
+    overflow-wrap: anywhere;
+  }
+  .modal-heading .icon-button {
+    flex-shrink: 0;
+  }
+  .welcome-main {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    min-height: auto;
+    padding: 30px 0;
+  }
+  .welcome-story {
+    text-align: center;
+  }
+  .welcome-story h1 {
+    font-size: 34px;
+  }
+  .welcome-description {
+    font-size: 14px;
+  }
+  .wallet-art,
+  .welcome-benefits {
+    display: none;
+  }
+  .auth-card {
+    width: 100%;
+    max-width: 460px;
+    padding: 24px;
+  }
+  .auth-card > p,
+  .auth-switch {
+    font-size: 13px;
+  }
+  .auth-footnote {
+    font-size: 12px;
+  }
+  .role-tabs button {
+    font-size: 13px;
+    padding: 10px 8px;
+  }
+  .welcome-meta > span {
+    display: none;
+  }
+  .welcome-footer,
   .footer {
-    padding: 18px 15px;
-    font-size: 8px;
+    font-size: 11px;
+    gap: 16px;
+    flex-wrap: wrap;
   }
+  .quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .quick-actions button {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) 18px;
+    grid-template-rows: auto auto;
+    gap: 3px 12px;
+    text-align: left;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .quick-actions strong {
+    font-size: 14px;
+  }
+  .quick-actions small {
+    display: block;
+    font-size: 12px;
+  }
+  .quick-actions button > svg {
+    display: block;
+  }
+  .balance-bottom {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .balance-bottom strong {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+  .balance-bottom small {
+    font-size: 10px;
+  }
+  .account-number {
+    margin-left: 0;
+  }
+  .insight-strip {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    padding: 18px;
+  }
+  .insight-strip > div {
+    min-width: 0;
+    flex: 1;
+  }
+  .insight-strip strong {
+    font-size: 13px;
+  }
+  .insight-strip p {
+    font-size: 12px;
+  }
+  .insight-strip > .text-button {
+    grid-column: 2;
+    justify-self: start;
+    margin-left: 0;
+    font-size: 13px;
+  }
+}
+@media (max-width: 640px) {
+  .app-shell {
+    --collapsed-navigation-width: 64px;
+  }
+  .welcome {
+    padding: 20px 16px;
+  }
+  .welcome-story h1 {
+    font-size: 29px;
+    margin: 12px 0;
+  }
+  .welcome-footer > span:last-child,
   .footer > span:last-child {
     display: none;
   }
-  .metric-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
+  .main-content {
+    padding: 22px 14px 32px;
   }
-  .metric-card {
-    display: grid;
-    grid-template-columns: 1fr auto;
+  .topbar {
+    padding: 0 14px;
+  }
+  .topbar-right > .avatar {
+    display: none;
+  }
+  .breadcrumb {
+    font-size: 11px;
+  }
+  .page-heading {
+    margin-bottom: 22px;
+  }
+  .page-heading h1 {
+    font-size: 26px;
+  }
+  .page-heading > .button {
+    min-width: 44px;
+  }
+  .page-heading > div:first-child {
+    width: 100%;
+  }
+  .heading-actions {
+    width: 100%;
+  }
+  .heading-actions .button {
+    flex: 1;
+  }
+  .balance-card {
+    padding: 20px;
+    min-height: auto;
+  }
+  .balance-value {
+    font-size: 30px;
+  }
+  .balance-bottom > svg {
+    display: none;
+  }
+  .balance-bottom > div {
+    flex-basis: 100%;
+  }
+  .balance-label {
+    margin-top: 22px;
+    font-size: 12px;
+  }
+  .quick-card {
     padding: 18px;
   }
-  .metric-icon {
-    grid-column: 2;
-    grid-row: 1/4;
-    margin: 0;
-    align-self: center;
+  .quick-card h2 {
+    font-size: 19px;
   }
-  .metric-card > strong {
-    font-size: 28px;
-    margin: 3px 0;
+  .panel-heading {
+    padding: 18px 16px;
   }
-  .metric-card > small {
-    font-size: 9px;
+  .panel-heading h2 {
+    font-size: 18px;
   }
-  .receipt-notice {
-    font-size: 10px;
+  .table-toolbar {
+    padding: 0 16px 16px;
   }
-  .modal {
-    padding: 22px;
+  .responsive-table tbody,
+  .responsive-table tfoot {
+    padding: 0 12px 12px;
   }
-  .modal h2 {
-    font-size: 20px;
+  .table-footer {
+    padding: 14px 16px;
+  }
+  .footer {
+    padding: 18px 14px;
   }
   .form-grid {
-    gap: 10px;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .modal {
+    padding: 20px;
+  }
+}
+@media (max-height: 500px) and (max-width: 850px) {
+  .app-shell:not(.sidebar-collapsed) .sidebar > .brand,
+  .app-shell:not(.sidebar-collapsed) .workspace-label {
+    display: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {

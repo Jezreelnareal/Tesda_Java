@@ -28,21 +28,16 @@ import {
 } from "@/lib/api";
 import { useSession } from "@/components/shared/SessionProvider";
 import { AppShell } from "@/components/shared/AppShell";
-import { Field, formValues, Modal } from "@/components/shared/Forms";
+import { formValues } from "@/components/shared/Forms";
 import { TransactionTable } from "@/components/shared/TransactionTable";
-
-type Operation = "cash-in" | "withdraw" | "transfer";
-const labels: Record<Operation, string> = {
-  "cash-in": "Cash in",
-  withdraw: "Withdraw",
-  transfer: "Send money",
-};
+import { MoneyPage, operationContent, type Operation } from "./MoneyPage";
 
 export default function Dashboard() {
   const { session, refresh } = useSession();
   const [data, setData] = useState<UserDashboard | null>(null);
   const [tab, setTab] = useState("overview");
-  const [operation, setOperation] = useState<Operation | null>(null);
+  const operation: Operation | null =
+    tab === "cash-in" || tab === "transfer" || tab === "withdraw" ? tab : null;
   const [busy, setBusy] = useState(false);
   const submitting = useRef(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -66,52 +61,65 @@ export default function Dashboard() {
   }, [session.role, load]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submitting.current || !operation) return;
+    if (submitting.current || !operation) return false;
     submitting.current = true;
     setBusy(true);
     setFormError("");
     try {
       const result = await api<Receipt>(`user/${operation}`, formValues(event));
       setReceipt(result);
-      setOperation(null);
+      setData((current) =>
+        current ? { ...current, user: result.user } : current,
+      );
       await load();
+      return true;
     } catch (error) {
       setFormError(errorText(error));
       if (error instanceof ApiError && error.status === 401) await refresh();
+      return false;
     } finally {
       submitting.current = false;
       setBusy(false);
     }
   }
-  function open(next: Operation) {
+  function navigate(next: string) {
+    if (submitting.current) return;
     setFormError("");
-    setOperation(next);
+    setTab(next);
   }
   return (
     <AppShell
       role="user"
       tab={tab}
-      onTab={setTab}
+      onTab={navigate}
       name={data?.user.fullName ?? ""}
     >
       <div className="page-heading">
         <div>
-          <span className="eyebrow">YOUR MONEY, AT A GLANCE</span>
+          <span className="eyebrow">
+            {operation
+              ? "YOUR EVERYDAY TRANSACTIONS"
+              : "YOUR MONEY, AT A GLANCE"}
+          </span>
           <h1>
             {tab === "activity"
               ? "Your activity"
-              : `Hello${data ? `, ${data.user.fullName.split(" ")[0]}` : ""}.`}
+              : operation
+                ? operationContent[operation].title
+                : `Hello${data ? `, ${data.user.fullName.split(" ")[0]}` : ""}.`}
           </h1>
           <p>
             {tab === "activity"
               ? "Every move, clearly in view."
-              : "A fresh look at your everyday finances."}
+              : operation
+                ? operationContent[operation].description
+                : "A fresh look at your everyday finances."}
           </p>
         </div>
         <button
           className="button secondary"
           onClick={() => void load()}
-          disabled={refreshing}
+          disabled={refreshing || busy}
         >
           <RefreshCw size={16} className={refreshing ? "spin" : ""} />
           Refresh
@@ -145,6 +153,17 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
+          {operation && (
+            <MoneyPage
+              key={operation}
+              operation={operation}
+              data={data}
+              busy={busy}
+              error={formError}
+              onSubmit={submit}
+              onActivity={() => navigate("activity")}
+            />
+          )}
           {tab === "overview" && (
             <>
               <div className="wallet-grid">
@@ -176,7 +195,7 @@ export default function Dashboard() {
                   <span className="section-kicker">LET’S MAKE A MOVE</span>
                   <h2>Everyday essentials</h2>
                   <div className="quick-actions">
-                    <button onClick={() => open("cash-in")}>
+                    <button onClick={() => navigate("cash-in")}>
                       <span className="action-icon">
                         <Plus size={23} />
                       </span>
@@ -184,7 +203,7 @@ export default function Dashboard() {
                       <small>Add to your wallet</small>
                       <ArrowUpRight size={18} />
                     </button>
-                    <button onClick={() => open("transfer")}>
+                    <button onClick={() => navigate("transfer")}>
                       <span className="action-icon">
                         <Send size={21} />
                       </span>
@@ -192,7 +211,7 @@ export default function Dashboard() {
                       <small>Make someone’s day</small>
                       <ArrowUpRight size={18} />
                     </button>
-                    <button onClick={() => open("withdraw")}>
+                    <button onClick={() => navigate("withdraw")}>
                       <span className="action-icon">
                         <ArrowDownLeft size={23} />
                       </span>
@@ -216,97 +235,45 @@ export default function Dashboard() {
                 </div>
                 <button
                   className="text-button"
-                  onClick={() => setTab("activity")}
+                  onClick={() => navigate("activity")}
                 >
                   View activity <ArrowRight size={16} />
                 </button>
               </div>
             </>
           )}
-          <section className="panel">
-            <div className="panel-heading">
-              <div>
-                <h2>
-                  {tab === "overview"
-                    ? "Recent activity"
-                    : "Transaction history"}
-                </h2>
-                <p>
-                  {tab === "overview"
-                    ? "The latest from your wallet."
-                    : "Search and filter your completed transactions."}
-                </p>
+          {!operation && (
+            <section className="panel">
+              <div className="panel-heading">
+                <div>
+                  <h2>
+                    {tab === "overview"
+                      ? "Recent activity"
+                      : "Transaction history"}
+                  </h2>
+                  <p>
+                    {tab === "overview"
+                      ? "The latest from your wallet."
+                      : "Search and filter your completed transactions."}
+                  </p>
+                </div>
+                {tab === "overview" && (
+                  <button
+                    className="text-button"
+                    onClick={() => navigate("activity")}
+                  >
+                    View all <ArrowRight size={16} />
+                  </button>
+                )}
               </div>
-              {tab === "overview" && (
-                <button
-                  className="text-button"
-                  onClick={() => setTab("activity")}
-                >
-                  View all <ArrowRight size={16} />
-                </button>
-              )}
-            </div>
-            <TransactionTable
-              transactions={data.transactions}
-              compact={tab === "overview"}
-            />
-          </section>
-        </>
-      )}
-      {operation && (
-        <Modal
-          title={labels[operation]}
-          onClose={() => setOperation(null)}
-          busy={busy}
-        >
-          <p className="modal-description">
-            {operation === "transfer"
-              ? "Send to another registered JCash mobile number."
-              : operation === "cash-in"
-                ? "Add funds to your JCash wallet."
-                : "Withdraw funds from your available balance."}
-          </p>
-          <form onSubmit={submit}>
-            <fieldset disabled={busy}>
-              {operation === "transfer" && (
-                <Field
-                  label="Recipient mobile number"
-                  name="receiver"
-                  required
-                  inputMode="tel"
-                  pattern="09[0-9]{9}"
-                  maxLength={11}
-                  placeholder="09XXXXXXXXX"
-                />
-              )}
-              <Field
-                label="Amount (PHP)"
-                name="amount"
-                required
-                inputMode="decimal"
-                pattern="[0-9]+(\.[0-9]{1,2})?"
-                maxLength={16}
-                placeholder="0.00"
+              <TransactionTable
+                key={tab}
+                transactions={data.transactions}
+                compact={tab === "overview"}
               />
-              {data && (
-                <p className="input-hint">
-                  Available balance: {money(data.user.balance)}
-                </p>
-              )}
-              {formError && (
-                <p className="notice error" role="alert">
-                  {formError}
-                </p>
-              )}
-              <button type="submit" className="button primary full-width">
-                {busy
-                  ? "Processing…"
-                  : `Confirm ${labels[operation].toLowerCase()}`}
-                <ArrowRight size={17} />
-              </button>
-            </fieldset>
-          </form>
-        </Modal>
+            </section>
+          )}
+        </>
       )}
     </AppShell>
   );

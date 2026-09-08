@@ -11,7 +11,15 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Apply the saved theme while parsing HTML, before React or first paint. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try { document.documentElement.dataset.theme = localStorage.getItem("jcash-theme") === "dark" ? "dark" : "light"; } catch { document.documentElement.dataset.theme = "light"; }`,
+          }}
+        />
+      </head>
       <body>
         <SessionProvider>{children}</SessionProvider>
       </body>
