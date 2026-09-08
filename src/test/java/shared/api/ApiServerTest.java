@@ -16,24 +16,37 @@ import user.repository.UserRepository;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ApiServerTest {
-    private ApiServer server;
+    private org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext server;
     private String token;
     private String base;
     private final HttpClient client = HttpClient.newHttpClient();
 
-    @BeforeEach void start() throws Exception {
-        User user = new User("Test Customer", "09171234567", "1234");
-        Admin admin = new Admin("admin", PinHasher.hash("1234"));
-        Auth auth = new Auth(new UserRepository() {
-            @Override public User findByMobileNumber(String mobile) { return mobile.equals(user.getMobileNumber()) ? user : null; }
-        }, new AdminRepository() {
-            @Override public Admin findByUsername(String name) { return name.equals("admin") ? admin : null; }
-        });
-        server = new ApiServer(0, auth, () -> { });
-        server.start(); base = "http://127.0.0.1:" + server.port();
+    @BeforeEach void start() {
+        server = (org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext)
+                new org.springframework.boot.builder.SpringApplicationBuilder(shared.WebApplication.class, TestBeans.class)
+                        .run("--server.port=0", "--logging.level.root=WARN");
+        base = "http://127.0.0.1:" + server.getWebServer().getPort();
     }
 
-    @AfterEach void stop() { server.close(); }
+    @AfterEach void stop() { if (server != null) server.close(); }
+
+    @org.springframework.boot.test.context.TestConfiguration(proxyBeanMethods = false)
+    static class TestBeans {
+        @org.springframework.context.annotation.Bean
+        @org.springframework.context.annotation.Primary
+        Auth testAuth() {
+            User user = new User("Test Customer", "09171234567", "1234");
+            Admin admin = new Admin("admin", PinHasher.hash("1234"));
+            return new Auth(new UserRepository() {
+                @Override public User findByMobileNumber(String mobile) { return mobile.equals(user.getMobileNumber()) ? user : null; }
+            }, new AdminRepository() {
+                @Override public Admin findByUsername(String name) { return name.equals("admin") ? admin : null; }
+            });
+        }
+        @org.springframework.context.annotation.Bean
+        @org.springframework.context.annotation.Primary
+        DatabaseCheck testDatabaseCheck() { return () -> { }; }
+    }
 
     private HttpResponse<String> request(String path, String body, boolean verified) throws Exception {
         var builder = HttpRequest.newBuilder(URI.create(base + "/api/" + path));
@@ -80,6 +93,22 @@ class ApiServerTest {
         assertEquals(429, login("user", "09171234567", "1234").statusCode());
         assertEquals(200, login("admin", "admin", "1234").statusCode());
         assertEquals(403, request("user/dashboard", null, true).statusCode());
+    }
+
+    @Test void frameworkPreservesHealthErrorsAndResponseHeaders() throws Exception {
+        var health = request("health", null, true);
+        assertEquals(200, health.statusCode());
+        assertTrue(health.body().contains("connected"));
+        var guest = request("session", null, true);
+        assertEquals("nosniff", guest.headers().firstValue("X-Content-Type-Options").orElseThrow());
+        assertTrue(guest.headers().firstValue("Cache-Control").orElseThrow().contains("no-store"));
+        assertEquals(404, request("missing", null, true).statusCode());
+        var unsupported = HttpRequest.newBuilder(URI.create(base + "/api/session")).DELETE().build();
+        assertEquals(405, client.send(unsupported, HttpResponse.BodyHandlers.ofString()).statusCode());
+        var wrongType = HttpRequest.newBuilder(URI.create(base + "/api/login"))
+                .header("X-JCash-Request", "1").header("Content-Type", "text/plain")
+                .POST(HttpRequest.BodyPublishers.ofString("{}")).build();
+        assertEquals(415, client.send(wrongType, HttpResponse.BodyHandlers.ofString()).statusCode());
     }
 
     @Test void mutationRequiresVerificationAndBodiesAreValidated() throws Exception {

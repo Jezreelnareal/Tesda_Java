@@ -12,6 +12,12 @@ public final class DatabaseConnection {
     private static final String DEFAULT_PASSWORD = "";
     private static final int VALIDATION_TIMEOUT_SECONDS = 2;
     private static Connection reusableConnection;
+    private static volatile java.util.function.Function<String, String> settings = System::getenv;
+
+    /** Spring supplies environment variables and optional local .env properties. */
+    public static void configureSettings(java.util.function.Function<String, String> resolver) {
+        settings = java.util.Objects.requireNonNull(resolver);
+    }
 
     private DatabaseConnection() {
         // Utility class
@@ -101,7 +107,7 @@ public final class DatabaseConnection {
     }
 
     private static String getSetting(String environmentName, String fallback) {
-        String value = System.getenv(environmentName);
+        String value = settings.apply(environmentName);
         return value == null ? fallback : value;
     }
 

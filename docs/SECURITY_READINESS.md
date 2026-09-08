@@ -10,6 +10,11 @@ penetration tests, or verification of a deployed environment. Findings below
 are based on source inspection, not demonstrated attacks against a running
 system. All checklist items remain pending until supporting evidence is recorded.
 
+The backend migrated to Java 26, Spring Boot 4.1.1, Spring MVC, and Spring
+Security on September 8, 2026. Endpoint links below refer to the migrated
+controllers. The original findings remain pending; framework migration and
+passing regression tests do not close the deployment checklist.
+
 ## Existing safeguards
 
 The reviewed code includes prepared SQL statements, salted PBKDF2 PIN hashing,
@@ -27,7 +32,7 @@ the whole application or its deployment is secure.
 |---|---|---|---|
 | SEC-01 | The customer cash-in endpoint calls [CashIn.java](../src/main/java/user/service/CashIn.java) to credit a client-supplied amount without verifying external payment. | A signed-in customer can create a balance without providing funds. | Credit funds only through a verified payment or authorized deposit workflow. Validate payment authenticity, amount, currency, recipient, and settlement status; prevent reuse of the same payment reference. |
 | SEC-02 | [SessionStore.java](../src/main/java/shared/api/SessionStore.java) stores login failures per browser session. [Auth.java](../src/main/java/shared/service/Auth.java) accepts four-digit PINs for customers and administrators. | A new session resets the guessing allowance; a four-digit PIN has only 10,000 possibilities. | Add persistent account-based throttling with supplementary IP limits and abuse monitoring. Use stronger authentication and administrator MFA. Review customer MFA and reauthentication for sensitive transactions. |
-| SEC-03 | [ApiServer.java](../src/main/java/shared/api/ApiServer.java) and [Transfer.java](../src/main/java/user/service/Transfer.java) have no duplicate-request protection in the reviewed money-operation flow. | Retrying after a lost response can execute a transfer or other money operation twice. | Add persistent idempotency keys scoped to the authenticated account and operation. Atomically store the key, request details, and result with the money change; reject key reuse with different details. |
+| SEC-03 | [ApiController.java](../src/main/java/shared/api/ApiController.java) and [Transfer.java](../src/main/java/user/service/Transfer.java) have no duplicate-request protection in the reviewed money-operation flow. | Retrying after a lost response can execute a transfer or other money operation twice. | Add persistent idempotency keys scoped to the authenticated account and operation. Atomically store the key, request details, and result with the money change; reject key reuse with different details. |
 | SEC-04 | [compose.yaml](../compose.yaml) publishes MySQL on all host interfaces. [DatabaseConnection.java](../src/main/java/shared/util/DatabaseConnection.java) falls back to root with an empty password. | Database exposure depends on the firewall and actual credentials, but these defaults are unsuitable for production. | Keep MySQL on a private network, use a least-privilege application account, and fail startup when required configuration or secrets are missing. |
 | SEC-05 | [Development credentials](../README.md#seeded-development-logins) are documented and [seed.sql](../database/seed.sql) provisions development accounts. | Known accounts provide an immediate access risk if carried into production. | Separate development seeds from production provisioning. Ensure development accounts are absent and provision production administrators with unique credentials. |
 
@@ -57,11 +62,11 @@ storage rather than committing them to a public repository.
 
 ### 2. Scan dependencies, source code, and secrets
 
-Run the Java dependency scan from the repository root, with Maven and a JDK
-available:
+Run the Java dependency scan from the repository root with JDK 26 installed.
+The Maven wrapper downloads Maven and selects the Windows JDK:
 
 ```powershell
-mvn org.owasp:dependency-check-maven:check
+.\mvnw org.owasp:dependency-check-maven:check
 ```
 
 [OWASP Dependency-Check](https://owasp.org/www-project-dependency-check/) checks

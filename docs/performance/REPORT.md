@@ -5,7 +5,7 @@ before the Next.js UI migration. They do not measure HTTP latency, browser
 rendering, or concurrent web traffic. The reusable JDBC connection remains
 synchronized; money operations continue to use dedicated JDBC transactions.
 
-## Environment
+## Historical measurement environment
 
 - Application: standalone, single-threaded Java console application
 - Runtime: Eclipse Temurin JDK 25
@@ -16,9 +16,11 @@ synchronized; money operations continue to use dedicated JDBC transactions.
 
 The measured benchmark did not run inside an application server. Its runtime
 configuration covered the JDBC connection lifecycle and JVM launch settings.
-The current application uses a JDK HTTP server with eight request workers and
-a separate Next.js frontend; that request path needs its own load benchmark
-before these results can be generalized to web traffic.
+The current application uses Java 26 and Spring Boot 4.1.1 with embedded
+Tomcat, Spring MVC, and Spring Security, plus a separate Next.js frontend.
+That request path needs its own load benchmark before these historical JDBC
+results can be generalized to web traffic. The Java 25 runtime and figures
+below describe the original measurements, not a new Java 26 benchmark.
 
 ## Identified Issue
 
@@ -34,8 +36,8 @@ each measured lookup.
 ## Applied Improvement
 
 `DatabaseConnection.withReusableConnection` now keeps one synchronized
-connection for short, single-operation repository calls. The HTTP server's
-shutdown hook and cleanup entry point release it. A failed or invalid
+connection for short, single-operation repository calls. Spring Boot's
+database shutdown bean and the standalone cleanup entry point release it. A failed or invalid
 connection is discarded so a later operation can reconnect.
 
 Cash-in and transfer retain dedicated connections because their row locks,
@@ -77,16 +79,19 @@ portable assessment evidence.
 
 ```powershell
 cd C:\Users\jezre\Tesda_Java
-powershell.exe -NoProfile -ExecutionPolicy Bypass `
-    -File .\scripts\run-performance.ps1
+.\scripts\run-performance.ps1
 ```
 
-Use a different database user or iteration count when required:
+The helper selects JDK 26 through the Maven wrapper and loads database
+settings from the root `.env`; existing environment variables take precedence.
+Start MySQL with `docker compose up -d --wait` first. New measurements should
+record their Java version separately from the historical results above.
+
+Use a different lookup account or iteration count when required:
 
 ```powershell
 $env:JCASH_BENCHMARK_MOBILE = "09181234567"
-powershell.exe -NoProfile -ExecutionPolicy Bypass `
-    -File .\scripts\run-performance.ps1 -Iterations 500
+.\scripts\run-performance.ps1 -Iterations 500
 ```
 
 The benchmark only executes `SELECT` statements and does not alter balances,

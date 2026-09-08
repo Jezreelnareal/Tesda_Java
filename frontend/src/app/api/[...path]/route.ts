@@ -57,7 +57,7 @@ async function proxy(
         }
       body = Buffer.concat(chunks).toString("utf8");
     }
-    const base = process.env.JCASH_API_URL ?? "http://127.0.0.1:8080";
+    const base = process.env.JCASH_API_URL ?? "http://127.0.0.1:8081";
     const upstream = await fetch(`${base}/api/${path.join("/")}`, {
       method: request.method,
       headers,

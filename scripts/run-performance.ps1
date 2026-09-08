@@ -4,24 +4,14 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$projectRoot = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot 'Initialize-Environment.ps1')
 $outputDirectory = Join-Path $projectRoot "target\classes"
 $resultsDirectory = Join-Path $projectRoot "docs\performance\results"
 $classpathFile = Join-Path $projectRoot "target\performance-classpath.txt"
 $mavenRepository = Join-Path $projectRoot "target\maven-repository"
 
-$mavenCommand = Get-Command mvn -ErrorAction SilentlyContinue
-if ($null -eq $mavenCommand) {
-    $bundledMaven = Get-ChildItem "C:\Program Files\JetBrains" -Recurse `
-        -Filter mvn.cmd -ErrorAction SilentlyContinue |
-        Select-Object -First 1
-    if ($null -eq $bundledMaven) {
-        throw "Maven was not found. Install Maven or run this from IntelliJ's Maven tool window."
-    }
-    $mavenExecutable = $bundledMaven.FullName
-} else {
-    $mavenExecutable = $mavenCommand.Source
-}
+. (Join-Path $projectRoot '.mvn/wrapper/Initialize-Java.ps1')
+$mavenExecutable = Join-Path $projectRoot 'mvnw.cmd'
 
 New-Item -ItemType Directory -Force -Path $resultsDirectory | Out-Null
 & $mavenExecutable "-Dmaven.repo.local=$mavenRepository" -q -DskipTests `

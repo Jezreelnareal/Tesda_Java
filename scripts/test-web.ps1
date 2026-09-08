@@ -24,13 +24,8 @@ try {
             if ($line -match '^\s*JCASH_DB_PASSWORD\s*=(.*)$') { $env:JCASH_DB_PASSWORD = $Matches[1].Trim().Trim('"').Trim("'") }
         }
     }
-    $maven = Get-Command mvn -ErrorAction SilentlyContinue
-    if ($maven) { $executable = $maven.Source }
-    else {
-        $bundled = Get-ChildItem 'C:\Program Files\JetBrains' -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1
-        if (-not $bundled) { throw 'Maven not found.' }
-        $executable = $bundled.FullName
-    }
+    . (Join-Path $projectRoot '.mvn/wrapper/Initialize-Java.ps1')
+    $executable = Join-Path $projectRoot 'mvnw.cmd'
     & $executable -B -ntp compile dependency:build-classpath '-Dmdep.outputFile=target/web-classpath.txt'
     if ($LASTEXITCODE -ne 0) { throw 'Java build failed.' }
     Set-Location -LiteralPath (Join-Path $projectRoot 'frontend')
