@@ -29,22 +29,34 @@ if this project is already set up on your computer.
 - **JDK 26** for the Java backend.
 - **Node.js 24** with npm for the frontend.
 - **Docker Desktop** with Linux containers for MySQL.
+- **Git** to clone the repository.
 
-You do not need to install Maven separately. The included `mvnw` helper
+You do not need to install Maven separately. The included `mvnw.cmd` helper
 downloads it automatically and selects Java 26 on Windows.
+The first setup needs internet access to download Maven and project dependencies.
 
 If you use IntelliJ, select **JDK 26** as the Project SDK and Maven runner JDK,
 then reload `pom.xml`.
 
-### 2. Open the project folder
+### 2. Clone and open the project folder
 
-Open PowerShell and run:
+For a new copy, open PowerShell in the parent folder where you want to save
+the project and run:
 
 ```powershell
-cd C:\Users\jezre\Tesda_Java
+git clone --branch "UI/UX" https://github.com/Jezreelnareal/Tesda_Java.git
+cd Tesda_Java
 ```
 
-Use your own folder path if you saved the project somewhere else.
+If you already have the project, open its folder instead. You do not need to
+clone it again to apply updates.
+Use your actual project folder path in the commands below if it differs from
+`C:\Users\jezre\Tesda_Java`.
+
+Before removing an old copy, save your root `.env`, any `frontend/.env.local`,
+and any local documentation or screenshots outside that folder. These files
+are ignored by Git and will not be restored by cloning. Restore your saved
+environment files into the new copy before starting it.
 
 ### 3. Set up the database settings once
 
@@ -62,6 +74,7 @@ local passwords. Leave the other settings as provided.
 
 **If your database already exists, keep its existing passwords.** You do not
 need to repeat this step every time you start the project.
+Changing `.env` does not change passwords already stored in MySQL.
 
 The backend and frontend both default to port **8081** for API communication.
 You do not need to configure an API address in the terminal.
@@ -70,12 +83,12 @@ You do not need to configure an API address in the terminal.
 
 ```powershell
 cd frontend
-npm ci
+npm.cmd ci
 cd ..
 ```
 
-Repeat `npm ci` when `package-lock.json` changes. Stop the frontend before
-reinstalling dependencies.
+Run this once in each new clone, and repeat it when `package-lock.json` changes.
+Stop the frontend before reinstalling dependencies.
 
 ### 5. Start the database and backend
 
@@ -83,7 +96,7 @@ Open **Docker Desktop** and wait until it is running. From the project folder:
 
 ```powershell
 docker compose up -d --wait
-.\mvnw spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
 Wait for the backend to start, and **leave this terminal open**.
@@ -102,7 +115,7 @@ Open a **second PowerShell terminal** and run:
 
 ```powershell
 cd C:\Users\jezre\Tesda_Java\frontend
-npm run dev
+npm.cmd run dev
 ```
 
 Leave this terminal open, then visit **http://localhost:3000**.
@@ -117,14 +130,14 @@ Open Docker Desktop, then run these commands in the first terminal:
 ```powershell
 cd C:\Users\jezre\Tesda_Java
 docker compose up -d --wait
-.\mvnw spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
 In the second terminal:
 
 ```powershell
 cd C:\Users\jezre\Tesda_Java\frontend
-npm run dev
+npm.cmd run dev
 ```
 
 Open **http://localhost:3000**. No dependency reinstall or terminal configuration
@@ -188,6 +201,9 @@ docker compose stop
 
 Your database is preserved. Do not run `database/schema.sql` manually for
 normal startup; it drops and recreates the database.
+Database data is stored in a Docker volume, outside the repository. Reusing
+the same folder name and Docker Compose project name keeps the same volume.
+Do not remove that volume if you want to retain your accounts and transactions.
 
 ## Common problems
 
@@ -196,7 +212,8 @@ normal startup; it drops and recreates the database.
 | Frontend cannot reach the backend | Keep the Java terminal running and check the health link in step 5. |
 | Database connection fails | Check Docker Desktop, run `docker compose ps`, and verify the passwords in `.env`. |
 | Port is already in use | Stop the previous instance before starting another. JCash uses port 8081 for Java and 3000 for Next.js. |
-| Java version error | Use `.\mvnw` and make sure JDK 26 is installed and selected in IntelliJ. |
+| Java version error | Use `.\mvnw.cmd` and make sure JDK 26 is installed and selected in IntelliJ. |
+| Compose asks for a password setting | Restore `.env` or create it from `.env.example` as described in step 3. |
 | PowerShell blocks `npm.ps1` | Use `npm.cmd run dev` as a fallback. |
 | Login is locked | A role locks after three failed attempts in one browser session. Reloading or signing out does not reset it; use a new session or wait for 30 minutes of inactivity. |
 
@@ -211,11 +228,15 @@ These checks are optional when you just want to run the app:
 
 | Check | Run from | Command |
 |---|---|---|
-| Backend tests | Project folder | `.\mvnw test` |
-| Frontend types | `frontend` | `npm run typecheck` |
-| Frontend build | `frontend` | `npm run build` |
-| Browser tests | Project folder | `.\scripts\test-web.ps1` |
-| Backend build | Project folder | `.\mvnw package` |
+| Backend tests | Project folder | `.\mvnw.cmd test` |
+| Frontend types | `frontend` | `npm.cmd run typecheck` |
+| Frontend build | `frontend` | `npm.cmd run build` |
+| Browser tests | Project folder | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\test-web.ps1` |
+| Backend build | Project folder | `.\mvnw.cmd package` |
+
+The frontend type check generates its required Next.js types automatically,
+so it also works immediately after `npm.cmd ci`, before starting the app.
+The backend build produces an executable JAR in `target/`.
 
 Browser tests need MySQL and Microsoft Edge. They use a temporary test database
 and remove it afterward, preserving your normal database.
@@ -231,13 +252,12 @@ and remove it afterward, preserving your normal database.
 | `database/` | Database schema and demo accounts |
 | `.mvn/` | Maven and Java startup helpers |
 | `scripts/` | Optional startup, test, and performance helpers |
-| `docs/` | Security checklist and performance report |
+| `docs/` | Tracked security checklist; other local documentation and reports are ignored |
 
 JCash is a learning simulation. See the [security checklist](docs/SECURITY_READINESS.md)
-for deployment limitations, the [Issue 11 web performance report](docs/performance/WEB_REPORT.md),
-[PDF report](docs/performance/Issue11-Performance-Report.pdf), and the
-[performance test guide](docs/performance/WEB_TEST_GUIDE.md) for the repeatable
-HTTP benchmark.
+for deployment limitations. Optional performance helpers are in `scripts/`.
+Generated performance reports and the project documentation PDF are local files;
+they are not included in a fresh clone.
 
 Short repository operations use a bounded JDBC pool (default: five connections).
 Optional `.env` settings `JCASH_DB_POOL_SIZE` and `JCASH_DB_POOL_TIMEOUT_MS` control

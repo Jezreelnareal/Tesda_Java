@@ -1,4 +1,5 @@
-param([Parameter(ValueFromRemainingArguments = $true)][string[]]$MavenArgs)
+# Leave Maven switches in $args so PowerShell does not interpret -o, -f, or -D.
+$MavenArgs = $args
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Initialize-Java.ps1')

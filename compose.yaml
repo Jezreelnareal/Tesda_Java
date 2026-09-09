@@ -5,10 +5,10 @@ services:
     restart: unless-stopped
 
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in the root .env file}
       MYSQL_DATABASE: jcash_db
       MYSQL_USER: jcash
-      MYSQL_PASSWORD: ${JCASH_DB_PASSWORD}
+      MYSQL_PASSWORD: ${JCASH_DB_PASSWORD:?Set JCASH_DB_PASSWORD in the root .env file}
 
     ports:
       - "3306:3306"
