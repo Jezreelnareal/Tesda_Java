@@ -1,0 +1,25 @@
+# Disposable performance database; separate from the application's normal MySQL service.
+name: jcash-performance
+services:
+  db:
+    image: mysql:8.4
+    container_name: jcash-performance-mysql
+    cpus: ${JCASH_PERF_DB_CPUS:-2.0}
+    mem_limit: ${JCASH_PERF_DB_MEMORY:-1g}
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: jcash_performance_bootstrap
+      MYSQL_USER: jcash
+      MYSQL_PASSWORD: ${JCASH_DB_PASSWORD:?Set JCASH_DB_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - performance_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$${MYSQL_ROOT_PASSWORD}\""]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+volumes:
+  performance_data:

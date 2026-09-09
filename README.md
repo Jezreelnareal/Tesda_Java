@@ -234,5 +234,12 @@ and remove it afterward, preserving your normal database.
 | `docs/` | Security checklist and performance report |
 
 JCash is a learning simulation. See the [security checklist](docs/SECURITY_READINESS.md)
-for deployment limitations and the [performance report](docs/performance/REPORT.md)
-for the historical JDBC benchmark.
+for deployment limitations, the [Issue 11 web performance report](docs/performance/WEB_REPORT.md),
+[PDF report](docs/performance/Issue11-Performance-Report.pdf), and the
+[performance test guide](docs/performance/WEB_TEST_GUIDE.md) for the repeatable
+HTTP benchmark.
+
+Short repository operations use a bounded JDBC pool (default: five connections).
+Optional `.env` settings `JCASH_DB_POOL_SIZE` and `JCASH_DB_POOL_TIMEOUT_MS` control
+the pool size and wait timeout; restart the backend after changing them. Money
+operations retain their dedicated JDBC transactions.
